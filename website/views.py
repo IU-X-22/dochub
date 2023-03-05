@@ -5,7 +5,6 @@ from django.core.files.storage import FileSystemStorage
 from django.contrib.auth.models import User
 from django.contrib import messages 
 from django.http import HttpResponse
-from smb.SMBConnection import SMBConnection
 from django.contrib.auth.forms import UserCreationForm
 from django.http import FileResponse, Http404
 import json
