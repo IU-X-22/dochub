@@ -1,0 +1,11 @@
+version: '1'
+
+services:
+    djnago:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        volumes:
+            - ./:./
+        ports:
+            - 8000:8000

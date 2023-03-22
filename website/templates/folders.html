@@ -1,0 +1,136 @@
+{% include 'header.html' %}
+<div class="container-sm">
+  <form action="/search/" method="post">
+    {% csrf_token %}
+    <div class="input-group mb-3">
+      <input type="text" name="search" class="form-control" placeholder="Поиск в"
+        aria-label="Поиск в" aria-describedby="button-addon2" required aria-required>
+      <select class="form-select" name="search_type" style="max-width: 150px;">
+        <option value="0" selected>Название</option>
+        <option value="1">Описание</option>
+        <option value="2">Содержание</option>
+      </select>
+      <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2">Найти</button>
+    </div>
+  </form>
+</div>
+
+<div class="container-sm">
+  <div class="card">
+    <div class="card-header d-flex flex-row justify-content-between">
+      <div aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active" aria-current="page">Главная</li>
+        </ol>
+      </div>
+      <div class="text-end btn-group">
+        <button type="button" data-bs-toggle="modal" data-bs-target="#AddFolderModal" class="btn btn-primary">
+          <i class="bi bi-folder-plus"></i> Новая папка</button>
+        <button type="button" data-bs-toggle="modal" data-bs-target="#AddFileModal" class="btn btn-secondary">
+          <i class="bi bi-upload"></i> Загрузить файл</button>
+      </div>
+    </div>
+    <div class="card-body d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+      <table class="table" style="  table-layout: fixed; width:100% ">
+        <thead>
+          <tr>
+            <th scope="col">Название</th>
+            <th scope="col">Последнее изменение</th>
+            <th scope="col">Количество эл-ов</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for folder in folders %}
+
+          <tr onclick=' location.href = "/{{folder.uuid_name}}"'>
+            <td>{{folder.name}}</td>
+            <td>{{folder.datetime |date:"d-m-Y H:i"}}</td>
+            <td>{{folder.count}}</td>
+          </tr>
+        </tbody>
+        {% endfor %}
+      </table>
+
+    </div>
+  </div>
+</div>
+
+{% include 'add_file.html' %}
+{% include 'add_folder.html' %}
+{% include 'message.html' %}
+
+
+
+<div class="offcanvas offcanvas-bottom " tabindex="-1" id="offcanvasBottom" aria-labelledby="offcanvasBottomLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title able-layout: fixed; width:100% " id="offcanvasBottomLabel" style="word-wrap:break-word;">
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body small" style="word-wrap:break-word;" id="info_desc">
+
+  </div>
+  <div class="offcanvas-body small" id="info_time">
+
+  </div>
+</div>
+
+
+<script type="text/javascript">
+    $('input[type="file"]').change(function(e){
+      var fileName = e.target.files[0].name;
+      document.getElementById("fname").value=fileName;
+
+    });
+  function Notvalid() {
+    var yratext = /['<', '>']/;
+    if (yratext.test(document.getElementById('fname').value)) {
+      document.getElementById('fname').value = '';
+      alert('Введены запрещенные символы : < или >');
+    }
+  }
+
+  function Info(name) {
+    var i = copy1.indexOf(name);
+    if (copy1[i].length > 200) {
+      document.getElementById("offcanvasBottomLabel").innerHTML = copy1[i].substring(0, 200) + "...";
+    }
+    else {
+      document.getElementById("offcanvasBottomLabel").innerHTML = copy1[i];
+    }
+    if (copy2[i].length > 600) {
+      document.getElementById("info_desc").innerHTML = copy2[i].substring(0, 600) + "...";
+    }
+    else {
+      document.getElementById("info_desc").innerHTML = copy2[i].substring(0, 600);
+    }
+  }
+  var elements_name = document.getElementsByClassName("cutname");
+  var elements_desc = document.getElementsByClassName("cutdesc");
+  var copy1 = [];
+  copy1.length = elements_name.length;
+  var copy2 = [];
+  copy2.length = elements_desc.length;
+  for (var i = 0; i < elements_name.length; i++) {
+    copy1[i] = elements_name[i].innerHTML;
+  }
+
+  for (var i = 0; i < elements_desc.length; i++) {
+    copy2[i] = elements_desc[i].innerHTML;
+  }
+  console.log(copy1);
+  console.log(copy2);
+  var names = '';
+  for (var i = 0; i < elements_name.length; i++) {
+    if (elements_name[i].innerHTML.length > 20) {
+      elements_name[i].innerHTML = elements_name[i].innerHTML.substring(0, 20) + "...";
+    }
+    if (elements_desc[i].innerHTML.length > 150) {
+      elements_desc[i].innerHTML = elements_desc[i].innerHTML.substring(0, 150) + "...";
+    }
+  }
+
+</script>
+
+
+</html>
