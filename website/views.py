@@ -9,9 +9,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import FileResponse, Http404
 import hashlib
 from urllib.parse import unquote
-import pandas as pd
 import os
-import easyocr
+#import easyocr
 from pathlib import Path
 import pdf2image
 #from .thread import *
