@@ -8,10 +8,8 @@ from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.http import FileResponse, Http404
 import hashlib
-from urllib.parse import unquote
-import pandas as pd
 import os
-import easyocr
+#import easyocr
 from pathlib import Path
 import pdf2image
 #from .thread import *
@@ -29,6 +27,12 @@ def one_file(request,id_folder,id_file):
     except FileNotFoundError:
         return  HttpResponseNotFound("Файл не найден")
     return redirect('/')
+
+def one_doc(request,id_folder,id_file):
+    context = {}
+   # document = Document.objects.get(uuid_name=id_file)
+    response = render(request, 'one_doc.html', context)
+    return response    
 
 def one_folder(request,id_folder):
     context = {}

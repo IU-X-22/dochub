@@ -58,7 +58,7 @@
                   <li><a class="dropdown-item" type="button" data-bs-toggle="offcanvas"
                       data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom"
                       onclick="Info('{{document.name}}');">Подробнее</a></li>
-                  <form action="/{{folder.uuid_name}}/{{document.uuid_name}}" method="post">
+                  <form action="/{{folder.uuid_name}}/{{document.uuid_name}}/info" method="post">
                     {% csrf_token %}
                     <li><button class="dropdown-item" type="submit" name = "file_id" data-bs-toggle="offcanvas" value="{{document.uuid_name}}"
                         aria-controls="offcanvasBottom">Открыть файл</button></li>
