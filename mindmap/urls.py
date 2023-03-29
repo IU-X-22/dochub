@@ -22,8 +22,8 @@ from django.conf.urls.static import static
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    #path('login/',views.login_page, name = "login"),
-    #path('logout/',views.logout_page, name = "logout"),
+    path('login/',views.login_page, name = "login"),
+    path('logout/',views.logout_page, name = "logout"),
     #path('registration/',views.registraion_page, name = "registration"),
     path('', views.main_page, name = 'main'),
     path('add_document/',views.add_document),
@@ -31,5 +31,6 @@ urlpatterns = [
     path('search/',views.search),
     path('<uuid:id_folder>', views.one_folder),
     path('<uuid:id_folder>/<uuid:id_file>', views.one_file),
+    path('<uuid:id_folder>/<uuid:id_file>/info', views.one_doc),
     #path('open_file/', views.open_file)
 ]+ static(settings.DOCUMENT_URL, document_root=settings.DOCUMENT_ROOT)

@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'website'
+    'website',
    
 ]
 
@@ -96,24 +96,25 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-   # {
-    #    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    ##{
-    #    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    #},
-   # {
-   #     'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-   # },
-   # {
-   #     'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-  #  },
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Etc/GMT+3'
 #TIME_ZONE = 'Asia/Kolkata'
@@ -123,13 +124,14 @@ USE_TZ = True
 
 LOGIN_URL = 'login/'
 LOGOUT_URL = 'logout/'
+LOGOUT_REDIRECT = 'login/'
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-
+AUTH_USER_MODEL = "website.CustomUser" 
 DOCUMENT_URL = '/documents/'
 DOCUMENT_ROOT = os.path.join(BASE_DIR, 'documents')
 STATICFILES_DIRS = (

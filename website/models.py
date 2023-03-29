@@ -2,8 +2,10 @@ from django.db import models
 import uuid
 from django.db.models import Model
 from datetime import datetime
+from django.contrib.auth.models import AbstractUser
 from django.contrib.postgres.fields import ArrayField
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
+
 from mindmap import settings
 
 class GroupDocuments(models.Model):
@@ -26,6 +28,8 @@ class Document(models.Model):
     uuid_name = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4, editable=False)
     name = models.TextField()
     description = models.TextField()
+    text = models.TextField()
+
    # text = ArrayField(models.CharField(max_length=100), blank=False)
     datetime = models.DateTimeField()
     group_folder =  models.ForeignKey('GroupDocuments', on_delete=models.PROTECT) # Many-to-Many
@@ -36,3 +40,8 @@ class Document(models.Model):
         
     def get_url(self):
         return self.document.url
+
+
+class CustomUser(AbstractUser):
+    position = models.TextField() 
+
