@@ -11,8 +11,9 @@ from django.core.validators import *
 from django.contrib.auth.forms import UserCreationForm
 from django.http import FileResponse, Http404
 import hashlib
+
 import os
-import easyocr
+#import easyocr
 from pathlib import Path
 import pdf2image
 from .thread import *
