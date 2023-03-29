@@ -2,4 +2,4 @@ pdf2image
 Django
 Django-admin
 psycopg2-binary
-easyorc
+easyocr
