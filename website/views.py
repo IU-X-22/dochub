@@ -17,7 +17,7 @@ from website.models import Document, GroupDocuments
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-@login_required(login_url='/login/')
+@permission_required('website.view_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
     document = Document.objects.get(uuid_name=id_file)
     try:
@@ -28,13 +28,12 @@ def one_file(request, id_folder, id_file):
     return redirect('/')
 
 
-@login_required(login_url='/login/')
+@permission_required('website.edit_document', raise_exception=True)
 def one_doc(request, id_folder, id_file):
     context = {
         'folder': GroupDocuments.objects.get(uuid_name=id_folder),
-        'info': Document.objects.get(uuid_name=id_file).text
+        'document': Document.objects.get(uuid_name=id_file)
     }
-    # document = Document.objects.get(uuid_name=id_file)
     response = render(request, 'one_doc.html', context)
     return response
 
@@ -57,7 +56,7 @@ def add_document(request):
     if request.method == 'POST':
         file_path = request.FILES.get('path')
         file_name = request.POST.get('name')
-        file_ext = '.' + file_name.split('.')[-1]
+        file_ext = '.pdf'
         file_description = request.POST.get('description')
         f = GroupDocuments.objects.get(name=request.POST.get('folder'))
         folder = f.get_uuid()
@@ -69,9 +68,10 @@ def add_document(request):
                 return redirect('/'+str(folder))
 
         f.count += 1
-        file_path.name = str(str(
-            hashlib.sha512(file_name.encode('utf-8')).hexdigest()) + file_ext)
         f.save()
+        file_path.name = str(str(
+            hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext )
+        print(file_path.name)
         document = Document(document=file_path, name=file_name,
                             datetime=datetime.now(timezone(timedelta(hours=+3))
                                                   ).strftime(
@@ -80,7 +80,7 @@ def add_document(request):
                             group_uuid=folder)
         document.save()
 
-        t = threading.Thread(target=ParseFileThread, args=(f.name, document))
+        t = threading.Thread(target=ParseFileThread, args=(f.name, document,))
         t.start()
     return redirect('/'+str(folder))
 

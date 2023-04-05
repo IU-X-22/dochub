@@ -31,6 +31,7 @@ class Document(models.Model):
     name = models.TextField()
     description = models.TextField()
     text = models.TextField()
+    is_readed = models.BooleanField(default=False)
     # text = ArrayField(models.CharField(max_length=100), blank=False)
     datetime = models.DateTimeField()
     group_folder = models.ForeignKey('GroupDocuments', on_delete=models.PROTECT)  # Many-to-Many

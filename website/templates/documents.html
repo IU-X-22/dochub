@@ -52,10 +52,8 @@
                   onclick="Info('{{document.name}}');" title="Подробнее..."><i class="bi bi-three-dots"></i></a>
                 <button class="btn btn-primary" type="submit" name = "file_id" data-bs-toggle="offcanvas" href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" value="{{document.uuid_name}}"
                   aria-controls="offcanvasBottom" title="Открыть файл"><i class="bi bi-eye"></i></button>
-                {% if request.user.username == "admin" %}
                   <button class="btn btn-danger" type="submit" name = "file_id" data-bs-toggle="offcanvas" href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" value="{{document.uuid_name}}"
                     aria-controls="offcanvasBottom" title="Удалить файл"><i class="bi bi-x"></i></button>
-                {% endif %}
               </div>
             </form>
           </td>
