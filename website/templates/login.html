@@ -8,26 +8,24 @@
     <meta name="description" content="">
     <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
     <meta name="generator" content="Hugo 0.98.0">
-    <title>MindMap Project</title>
+    <title>DOCHUB</title>
     <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'login_registration.css' %}" rel="stylesheet">
 </head>
 
 
-<body>
-
-    <main class="form-signin w-100 m-auto">
+<body class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <main class="form-control m-auto" style="max-width: 400px;">
         <form method="POST">
             {% csrf_token %}
-            <h1 class="h3 mb-3 fw-normal" style="text-align: center;">Hello, user!</h1>
-            <div class="form-floating">
-                <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Login">
-                <label for="floatingInput">Login</label>
+            <h1 class="h3 mb-4 fw-normal" style="text-align: center;">Авторизация</h1>
+            <div class="form-floating mb-1">
+                <input type="text" name="username" class="form-control" id="floatingInput" placeholder="Имя пользователя">
+                <label for="floatingInput">Имя пользователя</label>
             </div>
-            <div class="form-floating">
+            <div class="form-floating mb-3">
                 <input type="password" name="password" class="form-control" id="floatingPassword"
-                    placeholder="Password">
-                <label for="floatingPassword">Password</label>
+                    placeholder="Пароль">
+                <label for="floatingPassword">Пароль</label>
             </div>
             {% if messages %}
             {% for message in messages %}
@@ -42,8 +40,8 @@
             {% endif %}
             {% endfor %}
             {% endif %}
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-            <p>New user? <a href="/registration">Sign up</a></p>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">Войти</button>
+            <p>Данные для входа уточните у администратора.</p>
         </form>
     </main>
 

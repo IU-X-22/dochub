@@ -20,7 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@bi6(fl5x8oke26&rhh9%o6vav1l7-!*!ynr%j*8d+6783u@z8'
+SECRET_KEY = ('django-insecure' +
+              '-@bi6(fl5x8oke26&rhh9%o6vav1l7-!*!ynr%j*8d+6783u@z8')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -31,7 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-     #'simpleui',
+    # 'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'website',
-   
 ]
 
 MIDDLEWARE = [
@@ -78,35 +78,36 @@ WSGI_APPLICATION = 'mindmap.wsgi.application'
 
 DATABASES = {
     'default': {
-       'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-
     }
 }
 
-#        'ENGINE': 'django.db.backends.postgresql',
- #       'NAME': 'dochub',
- #       'USER' : 'postgres',
-  #      'PASSWORD': '1234',
-  #      'HOST': 'localhost',
-  #      'PORT': '5432'
+#      'ENGINE': 'django.db.backends.postgresql',
+#      'NAME': 'dochub',
+#      'USER' : 'postgres',
+#      'PASSWORD': '1234',
+#      'HOST': 'localhost',
+#      'PORT': '5432'
 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
+__apv_prefix = 'django.contrib.auth.password_validation.'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': __apv_prefix + 'UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': __apv_prefix + 'MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': __apv_prefix + 'CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': __apv_prefix + 'NumericPasswordValidator',
     },
 ]
 
@@ -117,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'Etc/GMT+3'
-#TIME_ZONE = 'Asia/Kolkata'
+# TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 
 USE_TZ = True
@@ -131,11 +132,10 @@ LOGOUT_REDIRECT = 'login/'
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = '/static/'
-AUTH_USER_MODEL = "website.CustomUser" 
+AUTH_USER_MODEL = "website.CustomUser"
 DOCUMENT_URL = '/documents/'
 DOCUMENT_ROOT = os.path.join(BASE_DIR, 'documents')
 STATICFILES_DIRS = (
-    
     os.path.join(BASE_DIR, "static"),
 )
 

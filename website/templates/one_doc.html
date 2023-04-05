@@ -1,2 +1,25 @@
 {% include 'header.html' %}
-{{info}}
+<div class="container-sm">
+    <form action="/search/" method="post">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+            <input type="text" name="search" class="form-control" placeholder="Поиск в файле"
+            aria-label="Поиск в файле" aria-describedby="button-addon2" required aria-required>
+            <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2"><i class="bi bi-search"></i></button>
+        </div>
+    </form>
+    <div aria-label="breadcrumb mb-3">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item" aria-current="page"><a href="/">Главная</a></li>
+          <li class="breadcrumb-item" aria-current="page"><a href="/{{folder.uuid_name}}">{{folder.name}}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
+        </ol>
+    </div>
+    <p class="form-control" style="min-width: 100%;" id="info">
+        {% if info %}
+            {{info}}
+        {% else %}
+            Во время обработки произошла ошибка. Сообщите администратору.
+        {% endif %}
+    </p>
+</div>
