@@ -1,19 +1,17 @@
-FROM python:latest
-
-WORKDIR .
-RUN sudo apt update && sudo apt upgrade
+FROM ubuntu:latest
+RUN apt-get update -y
+RUN apt-get install python3 -y
+RUN apt-get install python3-pip -y
+WORKDIR /dochub
+COPY ./requirements.txt ./requirements.txt
+RUN pip3 install -r requirements.txt
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 # install dependencies
-
-RUN pip install --upgrade pip
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
-# copy project
 COPY . .
-RUN python3 manage.py makemigrations
-RUN python3 manage.py migrate --run-syncdb
-CMD ["python3","manage.py","runserver","0.0.0.0:8000"]
+
+# copy project
+
 EXPOSE 8000

@@ -1,11 +1,30 @@
 version: '1'
 
 services:
-    djnago:
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-        volumes:
-            - ./:./
-        ports:
-            - 8000:8000
+  web:
+    build: .
+    command:  >
+      sh -c " 
+             python3 manage.py makemigrations website  &&
+             python3 manage.py migrate --run-syncdb &&
+             python3 manage.py runserver 0.0.0.0:8000"
+    image: kosten19/dochub
+    volumes:
+      - .:/usr/src/dochub/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+  db:
+    image: kosten19/dochub
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=dochub
+
+volumes:
+  postgres_data:
