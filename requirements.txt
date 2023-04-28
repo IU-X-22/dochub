@@ -3,3 +3,4 @@ Django
 Django-admin
 psycopg2-binary
 easyocr
+psutil

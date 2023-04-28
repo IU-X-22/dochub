@@ -2,6 +2,7 @@ FROM ubuntu:latest
 RUN apt-get update -y
 RUN apt-get install python3 -y
 RUN apt-get install python3-pip -y
+RUN apt install poppler-utils -y 
 WORKDIR /dochub
 COPY ./requirements.txt ./requirements.txt
 RUN pip3 install -r requirements.txt

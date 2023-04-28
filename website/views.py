@@ -1,24 +1,30 @@
 from urllib.parse import unquote
 from django.shortcuts import render, redirect
-
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseNotFound
 from django.http import FileResponse
 import hashlib
+import psutil
+from multiprocessing import Pool, cpu_count
 import threading
-
+import os
 from pathlib import Path
 from .thread import ParseFileThread
 from datetime import datetime, timezone, timedelta
 from website.models import Document, GroupDocuments
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+ # ***.all().only('name'm'value') динамически подгружает остальные
+ #***.all().valuse('name') {'val': 1} быстрее, но не подгружает остальные
+
+
+
 
 
 @permission_required('website.view_document', raise_exception=True)
-def one_file(request, id_folder, id_file):
+def file_in_browser_open(request, id_folder, id_file):
     document = Document.objects.get(uuid_name=id_file)
     try:
         return FileResponse(open(unquote(document.get_url()[1:]), 'rb'),
@@ -29,12 +35,15 @@ def one_file(request, id_folder, id_file):
 
 
 @permission_required('website.edit_document', raise_exception=True)
-def one_doc(request, id_folder, id_file):
+def one_file(request, id_folder, id_file):
+    folder = GroupDocuments.objects.get(uuid_name=id_folder)
+    file = Document.objects.get(uuid_name=id_file)
     context = {
-        'folder': GroupDocuments.objects.get(uuid_name=id_folder),
-        'document': Document.objects.get(uuid_name=id_file)
+        'folder': folder,
+        'document': file,
+        'doc_url': '/'+str(folder.uuid_name)+'/'+str(file.uuid_name)
     }
-    response = render(request, 'one_doc.html', context)
+    response = render(request, 'one_file.html', context)
     return response
 
 
@@ -63,14 +72,14 @@ def add_document(request):
         for i in Document.objects.filter(group_uuid=folder):
             if i.name == file_name:
                 messages.error(request,
-                               'Название файлов внутри одной' +
-                               'папки не должны быть одинаковыми!!')
+                               'Название файлов внутри одной \
+                               папки не должны быть одинаковыми!!')
                 return redirect('/'+str(folder))
 
         f.count += 1
         f.save()
-        file_path.name = str(str(
-            hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext )
+        file_path.name = str(
+            hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext 
         print(file_path.name)
         document = Document(document=file_path, name=file_name,
                             datetime=datetime.now(timezone(timedelta(hours=+3))
@@ -80,7 +89,7 @@ def add_document(request):
                             group_uuid=folder)
         document.save()
 
-        t = threading.Thread(target=ParseFileThread, args=(f.name, document,))
+        t = threading.Thread(target=ParseFileThread, args=(f.name, document))
         t.start()
     return redirect('/'+str(folder))
 

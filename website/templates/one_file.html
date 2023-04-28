@@ -15,11 +15,13 @@
           <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
         </ol>
     </div>
-    <p class="form-control" style="min-width: 100%;" id="info">
+    <p class="form-control" style="min-width: 50%;" id="info">
         {% if document.is_readed == True %}
             {{document.text}}
         {% else %}
         Файл обрабатывается, подождите. Если этот процесс продолжается более 5 минут, то обратитесь к системному администратору.
         {% endif %}
     </p>
+      <embed src="{{doc_url}}" style="width:50%; height:50%%;" frameborder="0"></embed>
+
 </div>
