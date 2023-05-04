@@ -5,13 +5,12 @@ services:
     build: .
     command:  >
       sh -c "
-             apt install poppler-utils -y &&
              python3 manage.py makemigrations website  &&
              python3 manage.py migrate --run-syncdb &&
              python3 manage.py runserver 0.0.0.0:8000"
     image: kosten19/dochub
     volumes:
-      - .:/usr/src/dochub/
+      - file_system_data:/dochub/documents/
     ports:
       - 8000:8000
     env_file:
@@ -26,6 +25,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=dochub
-
+ 
 volumes:
+  file_system_data:
   postgres_data:
