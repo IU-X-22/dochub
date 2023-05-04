@@ -1,18 +1,14 @@
 FROM ubuntu:latest
-RUN apt-get update -y
-RUN apt-get install python3 -y
-RUN apt-get install python3-pip -y
-RUN apt install poppler-utils -y 
-WORKDIR /dochub
-COPY ./requirements.txt ./requirements.txt
-RUN pip3 install -r requirements.txt
 
-# set environment variables
+RUN apt-get update -y
+RUN apt-get install python3 python3-pip poppler-utils -y
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-# install dependencies
+
+WORKDIR /dochub
 COPY . .
 
-# copy project
+RUN pip3 install -r requirements.txt
 
 EXPOSE 8000
