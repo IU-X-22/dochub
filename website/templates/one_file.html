@@ -1,5 +1,5 @@
 {% include 'header.html' %}
-<div class="container-sm">
+<div class="container-fluid" style="max-width: 90%">
     <form action="/search/" method="post">
         {% csrf_token %}
         <div class="input-group mb-3">
@@ -15,13 +15,15 @@
           <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
         </ol>
     </div>
-    <p class="form-control" style="min-width: 50%;" id="info">
-        {% if document.is_readed == True %}
-            {{document.text}}
-        {% else %}
-        Файл обрабатывается, подождите. Если этот процесс продолжается более 5 минут, то обратитесь к системному администратору.
-        {% endif %}
-    </p>
-      <embed src="{{doc_url}}" style="width:50%; height:50%%;" frameborder="0"></embed>
+    <div class="form-control d-flex flex-row gap-2">
+        <p class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;">
+            {% if document.is_readed == True %}
+                {{document.text}}
+            {% else %}
+            Файл обрабатывается, подождите. Если этот процесс продолжается более 5 минут, то обратитесь к системному администратору.
+            {% endif %}
+        </p>
+        <object width="100%" height="600px" style="overflow: scroll;" data="{{doc_url}}" type="application/pdf" ></object>
+    </div>
 
 </div>
