@@ -27,9 +27,9 @@ urlpatterns = [
     path('', views.main_page, name='main'),
     path('add_document/', views.add_document),
     path('add_folder/', views.add_folder),
-    path('search/', views.search),
     path('<uuid:id_folder>', views.one_folder),
     path('<uuid:id_folder>/<uuid:id_file>', views.file_in_browser_open),
     path('<uuid:id_folder>/<uuid:id_file>/info', views.one_file),
+    path('<uuid:id_folder>/<uuid:id_file>/edit', views.edit_file_text),
     # path('open_file/', views.open_file)
 ] + static(settings.DOCUMENT_URL, document_root=settings.DOCUMENT_ROOT)

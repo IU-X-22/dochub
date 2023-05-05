@@ -16,9 +16,7 @@ class GroupDocuments(models.Model):
     def get_uuid(self):
         return self.uuid_name
 
-
 def content_file_name(instance, filename):
-    print(instance)
     return '/'.join(['documents', str(instance.group_folder.name), filename])
 
 
@@ -45,3 +43,12 @@ class Document(models.Model):
 
 class CustomUser(AbstractUser):
     position = models.TextField()
+
+
+
+class Quote(models.Model):
+    name = models.CharField(max_length=250)
+    quote = models.TextField(max_length=1000)
+
+    def __str__(self):
+        return self.quote

@@ -16,7 +16,7 @@
         </ol>
     </div>
     <div class="form-control d-flex flex-row gap-2">
-        <p class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;">
+        <p  contenteditable="true" class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;">
             {% if document.is_readed == True %}
                 {{document.text}}
             {% else %}
