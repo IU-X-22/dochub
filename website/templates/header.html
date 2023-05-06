@@ -19,3 +19,13 @@
     </a>
   </div>
 </header>
+<div class="container-sm">
+  <form action="/search/" method="post">
+    {% csrf_token %}
+    <div class="input-group mb-3">
+      <input type="text" name="search" class="form-control" placeholder="Поиск"
+        aria-label="Поиск в" aria-describedby="button-addon2" required aria-required>
+
+      <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2">Найти</button>
+    </div>
+  </form>

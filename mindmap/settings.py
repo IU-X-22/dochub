@@ -24,10 +24,9 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'foo')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(os.environ.get("DEBUG", default=0))
-#DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=1))
 ALLOWED_HOSTS = str(os.environ.get("DJANGO_ALLOWED_HOSTS")).split(" ")
-#ALLOWED_HOSTS  = ['*']
+ALLOWED_HOSTS  = ['*']
 
 # Application definition
 
@@ -97,20 +96,19 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
-__apv_prefix = 'django.contrib.auth.password_validation.'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': __apv_prefix + 'UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': __apv_prefix + 'MinimumLengthValidator',
+        'NAME':  'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': __apv_prefix + 'CommonPasswordValidator',
+        'NAME':  'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': __apv_prefix + 'NumericPasswordValidator',
+        'NAME':'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 

@@ -1,13 +1,5 @@
 {% include 'header.html' %}
-<div class="container-fluid" style="max-width: 90%">
-    <form action="/search/" method="post">
-        {% csrf_token %}
-        <div class="input-group mb-3">
-            <input type="text" name="search" class="form-control" placeholder="Поиск в файле"
-            aria-label="Поиск в файле" aria-describedby="button-addon2" required aria-required>
-            <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2"><i class="bi bi-search"></i></button>
-        </div>
-    </form>
+
     <div aria-label="breadcrumb mb-3">
         <ol class="breadcrumb">
           <li class="breadcrumb-item" aria-current="page"><a href="/">Главная</a></li>
@@ -15,15 +7,19 @@
           <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
         </ol>
     </div>
+     <form action="/{{folder.uuid_name}}/{{document.uuid_name}}/edit" method="post">
+            {% csrf_token %}
     <div class="form-control d-flex flex-row gap-2">
-        <p  contenteditable="true" class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;">
-            {% if document.is_readed == True %}
+        <input type="text"  name = "text" class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;" value = "{{document.text}}">
+    <!--        {% if document.is_readed == True %}
                 {{document.text}}
             {% else %}
             Файл обрабатывается, подождите. Если этот процесс продолжается более 5 минут, то обратитесь к системному администратору.
-            {% endif %}
-        </p>
+            {% endif %}-->
+        </input>
         <object width="100%" height="600px" style="overflow: scroll;" data="{{doc_url}}" type="application/pdf" ></object>
     </div>
-
+    
+     <button type="submit" >Сохранить</button>
+     </form>
 </div>

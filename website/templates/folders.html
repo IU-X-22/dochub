@@ -1,19 +1,4 @@
 {% include 'header.html' %}
-
-<div class="container-sm">
-  <form action="/search/" method="post">
-    {% csrf_token %}
-    <div class="input-group mb-3">
-      <input type="text" name="search" class="form-control" placeholder="Поиск в"
-        aria-label="Поиск в" aria-describedby="button-addon2" required aria-required>
-      <select class="form-select" name="search_type" style="max-width: 150px;">
-        <option value="0" selected>Название{{request.username}}</option>
-        <option value="1">Описание</option>
-        <option value="2">Содержание</option>
-      </select>
-      <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2">Найти</button>
-    </div>
-  </form>
   <div class="d-flex flex-row justify-content-between mb-3">
     <div aria-label="breadcrumb">
       <ol class="breadcrumb">

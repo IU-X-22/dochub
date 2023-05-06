@@ -1,18 +1,5 @@
 {% include 'header.html' %}
-<div class="container-sm">
-  <form action="/search/" method="post">
-    {% csrf_token %}
-    <div class="input-group mb-3">
-      <input type="text" name="search" class="form-control" placeholder="Поиск в"
-        aria-label="Поиск в" aria-describedby="button-addon2" required aria-required>
-      <select class="form-select" name="search_type" style="max-width: 150px;">
-        <option value="0" selected>Название</option>
-        <option value="1">Описание</option>
-        <option value="2">Содержание</option>
-      </select>
-      <button class="btn btn-secondary" type="submit" class="btn btn-primary" id="button-addon2">Найти</button>
-    </div>
-  </form>
+
   <div class="d-flex flex-row justify-content-between mb-3">
     <div aria-label="breadcrumb">
       <ol class="breadcrumb">
@@ -45,18 +32,18 @@
           <td style=" word-wrap:break-word;" class="cutdesc">{{document.description}}</td>
           <td style="word-wrap:break-word;">{{document.datetime |date:"d-m-Y H:i"}}</td>
           <td style="word-wrap:break-word;">
-            <form class="text-center" action="/{{folder.uuid_name}}/{{document.uuid_name}}/info" method="post">
+           
               {% csrf_token %}
               <div class="btn-group">
-                <a class="btn btn-secondary" type="button" data-bs-toggle="offcanvas"
-                  data-bs-target="#offcanvasBottom" aria-controls="offcanvasBottom"
-                  onclick="Info('{{document.name}}');" title="Подробнее..."><i class="bi bi-three-dots"></i></a>
-                <button class="btn btn-primary" type="submit" name = "file_id" data-bs-toggle="offcanvas" href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" value="{{document.uuid_name}}"
-                  aria-controls="offcanvasBottom" title="Открыть файл"><i class="bi bi-eye"></i></button>
-                  <button class="btn btn-danger" type="submit" name = "file_id" data-bs-toggle="offcanvas" href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" value="{{document.uuid_name}}"
-                    aria-controls="offcanvasBottom" title="Удалить файл"><i class="bi bi-x"></i></button>
+                <a  href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" class="btn btn-secondary"
+                  aria-controls="offcanvasBottom"
+                  ><i class="bi bi-three-dots"></i></a>
+                <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}" class="btn btn-primary" 
+                  aria-controls="offcanvasBottom" ><i class="bi bi-eye"></i></a>
+                  <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}/delete" class="btn btn-danger"  
+                    aria-controls="offcanvasBottom" ><i class="bi bi-x"></i></a>
               </div>
-            </form>
+            
           </td>
         </tr>
         {% endfor %}

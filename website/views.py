@@ -3,21 +3,20 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
 from django.db.models import Q
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseNotFound
 from django.http import FileResponse
 import hashlib
 import psutil
-from multiprocessing import Pool, cpu_count
 import threading
 from website.thread import add_image
 import os
 from pathlib import Path
 from .thread import ParseFileThread
 from datetime import datetime, timezone, timedelta
-from website.models import Document, GroupDocuments, Quote
+from website.models import Document, GroupDocuments
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -53,8 +52,9 @@ def edit_file_text(request,id_folder, id_file):
     file = Document.objects.get(uuid_name=id_file)
     if request.method == 'POST':
         file.text = str(request.POST.get('text'))
+        print(request.POST.get('text'))
         file.save()
-    return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')    
+    return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
     
 @login_required(login_url='/login/')
 def one_folder(request, id_folder):
@@ -104,53 +104,17 @@ def add_document(request):
         return redirect('/'+str(folder.get_uuid()))
     else:
         return redirect('/')
-@permission_required('website.view_document', raise_exception=True)
-def search(request):
-    context = {}
-    response = render(request, 'main.html', context)
-    if request.method == 'POST':
-        search = request.POST.get('search')
-        search_type = request.POST.get('search_type')
-        print("SEARCH", search, search_type)
-        if search_type == '0':
-            documents = []
-            for i in Document.objects.all():
-                if str(search) in str(i.name):
-                    print(search, i.name)
-                    documents.append(i)
-            print(documents)
-            context = {
-                'documents': documents,
-                'year': str(datetime.now(
-                    timezone(timedelta(hours=+3))).strftime('%Y')),
-                'document': 'True'
-            }
-            response = render(request, 'main.html', context)
-            return response
-        elif search_type == '1':
-            documents = []
-            for i in Document.objects.all():
-                if str(search) in str(i.description):
-                    print(search, i.name)
-                    documents.append(i)
-            print(documents)
-            context = {'documents': documents, 'year': str(datetime.now(
-                timezone(timedelta(hours=+3))).strftime('%Y')
-                ), 'document': 'True'}
-            response = render(request, 'main.html', context)
-            return response
-        elif search_type == '2':
-            documents = []
-            for i in Document.objects.all():
-                pass
-
-            print(documents)
-            context = {'documents': documents, 'year': str(
-                datetime.now(timezone(timedelta(hours=+3))).strftime('%Y')),
-                'document': 'True'}
-            response = render(request, 'main.html', context)
-            return response
-
+    
+@permission_required('website.delete_document', raise_exception=True)
+def delete_document(request,id_folder,id_file): 
+    file = Document.objects.get(uuid_name=id_file)
+    folder=GroupDocuments.objects.get(uuid_name=id_folder)
+    folder.count-=1
+    folder.save()
+    file.document.delete()
+    file.delete()
+    return redirect('/'+str(folder.get_uuid()))
+   
 
 @permission_required('website.add_groupdocuments', raise_exception=True)
 def add_folder(request):
@@ -165,22 +129,29 @@ def add_folder(request):
             print(ex)
     return redirect('/')
 
-@login_required(login_url='/login/')
-def main_page(request):
-    list_folders = []
+@permission_required('website.view_document', raise_exception=True)
+def search_query(request):
     context = {
-        'folders': list_folders,
+        'folders': GroupDocuments.objects.all(),
         'year': str(datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
     if request.method == "POST":
-        search = request.POST.get('search')
+        query = request.POST.get('search')
+        search_query = SearchQuery(query)
+        search_vector = SearchVector("name","text","description")
+        context.update({'documents' :  Document.objects.annotate(search=search_vector,rank=SearchRank(search_vector,search_query)).filter(search=search_query).order_by('-rank')
+})
+    print(context)
+    response = render(request, 'documents.html', context)
+    return response
+        
 
 
 
-
-
-
-
-
+@permission_required('website.view_document', raise_exception=True)
+def main_page(request):
+    context = {
+        'folders': [],
+        'year': str(datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
     if request.method == "GET":
         sort= request.GET.get('sortby') #request.GET['sortby']
         if str(sort)=='toname':
