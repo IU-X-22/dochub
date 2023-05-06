@@ -30,8 +30,7 @@ def file_in_browser_open(request, id_folder, id_file):
         return FileResponse(open(unquote(document.get_url()[1:]), 'rb'),
                             content_type='application/pdf')
     except FileNotFoundError:
-        return HttpResponseNotFound("Файл не найден")
-    return redirect('/')
+        return redirect('/')
 
 
 
@@ -52,7 +51,6 @@ def edit_file_text(request,id_folder, id_file):
     file = Document.objects.get(uuid_name=id_file)
     if request.method == 'POST':
         file.text = str(request.POST.get('text'))
-        print(request.POST.get('text'))
         file.save()
     return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
     

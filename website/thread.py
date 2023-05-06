@@ -1,5 +1,5 @@
 from pathlib import Path
-#import easyocr
+import easyocr
 import psutil
 import os
 import pdf2image
@@ -11,12 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 image_queue = Queue()
 
-
 def ParseFileThread():
     p = psutil.Process(os.getpid())
     p.nice(19)
-
-
     while True:
         document = image_queue.get()  
         image_queue.task_done()
