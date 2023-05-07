@@ -71,6 +71,37 @@ TEMPLATES = [
 WSGI_APPLICATION = 'mindmap.wsgi.application'
 
 
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+     'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime}  {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': 'dochub.log',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'website': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
+
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 

@@ -6,9 +6,10 @@ import pdf2image
 import tempfile
 import math
 from queue import Queue
+import logging
 import threading
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+logger = logging.getLogger(__name__)
 image_queue = Queue()
 
 def ParseFileThread():
@@ -16,29 +17,28 @@ def ParseFileThread():
     p.nice(19)
     while True:
         document = image_queue.get()  
-        image_queue.task_done()
-        document = image_queue.get()    
+        text = ''
+        logger.warning("начало обработки файла "+document.name)
         reader = easyocr.Reader(['ru'], gpu=True)
-        print("file parsing started...")
         with tempfile.TemporaryDirectory() as path:
             pdf2image.convert_from_path(
-                os.path.join(BASE_DIR, str(document.get_url()))[1:], 800, path)
-            text = ''
-            print("images processing started")
+                os.path.join(BASE_DIR, str(document.get_url()))[1:], 700, path)
             for i in sorted(os.listdir(path)):
-                print("processing " + i)
+                logger.warning("processing " + i)
                 text += ''.join(reader.readtext(
-                    os.path.join(path, i), detail=0, paragraph=True, workers=1))
-    
+                    os.path.join(path, i), detail=0, paragraph=True)) #workers=1
+                text+=' '
             document.text = text
             document.is_readed = True
             document.save()
             print("end.")
             image_queue.task_done()
 
-t = threading.Thread(target=ParseFileThread,)
-t.daemon=True
-t.start()
+num_threads =int(os.environ.get("NUM_THREADS", default=1))          
+for _ in range(num_threads):
+    t = threading.Thread(target=ParseFileThread,)
+    t.daemon=True
+    t.start()
 
 
 def add_image(image):
