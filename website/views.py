@@ -143,8 +143,7 @@ def search_query(request):
     return response
         
 
-
-
+@login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def main_page(request):
     context = {
