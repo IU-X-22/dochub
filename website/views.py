@@ -133,7 +133,7 @@ def add_document(request):
             logger.warning("пользователь "+request.user.username+" загрузил документ "+file_name)
             if is_recognise:
                 add_image(document)
-            else: document.is_readed = True    
+            else: document.is_readed = True
             return redirect('/'+str(folder.get_uuid()))
         else:
             logger.warning("пользователь "+request.user.username+" зашел на страницу добавления документа без полезной нагрузки! Возможен перебор директорий!")
