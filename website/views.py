@@ -169,7 +169,7 @@ def add_folder(request):
             folder.save()
             logger.warning("пользователь "+request.user.username+" создал папку "+folder_name)
         except Exception as ex:
-            logger.warning("пользователь "+request.user.username+" ошибка при создании попки "+str(ex))
+            logger.warning("пользователь "+request.user.username+" ошибка при создании папки "+str(ex))
     else:
         logger.warning("пользователь "+request.user.username+" зашел на страницу создания папки без полезной нагрузки! Возможен перебор директорий!")
     return redirect('/')
