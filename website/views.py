@@ -66,6 +66,7 @@ def edit_file_text(request,id_folder, id_file):
             folder = document.group_uuid
             assert str(folder.uuid_name) == str(id_folder), "возможен перебор директорий!"
             document.text = str(request.POST.get('text'))
+            document.is_moderated = True
             logger.warning("пользователь "+request.user.username+" изменил содержание файла "+document.name)
             document.save()
             return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
@@ -117,21 +118,22 @@ def add_document(request):
             file_name = request.POST.get('name')
             file_ext = '.pdf'
             file_description = request.POST.get('description')
+            is_recognise = request.POST.get('recognise')
             folder=GroupDocuments.objects.get(name=request.POST.get('folder'))
             folder.count+=1
             folder.save()
-            fake = Faker()
-            for _ in range(1000):
-                file_path.name = str(
+            file_path.name = str(
                     hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext 
-                document = Document(document=file_path, name=fake.name(),
+            document = Document(document=file_path, name=file_name,
                                     datetime=datetime.now(timezone(timedelta(hours=+3))
                                                         ).strftime(
-                                                            '%Y-%m-%d %H:%M:%S'), description=fake.text,
+                                                            '%Y-%m-%d %H:%M:%S'), description=file_description,
                                     group_uuid=folder)
-                document.save()
-                logger.warning("пользователь "+request.user.username+" загрузил документ "+file_name)
-            #add_image(document)
+            document.save()
+            logger.warning("пользователь "+request.user.username+" загрузил документ "+file_name)
+            if is_recognise:
+                add_image(document)
+            else: document.is_readed = True    
             return redirect('/'+str(folder.get_uuid()))
         else:
             logger.warning("пользователь "+request.user.username+" зашел на страницу добавления документа без полезной нагрузки! Возможен перебор директорий!")
@@ -142,14 +144,19 @@ def add_document(request):
     
 @permission_required('website.delete_document', raise_exception=True)
 def delete_document(request,id_folder,id_file): 
-    file = Document.objects.get(uuid_name=id_file)
-    folder=GroupDocuments.objects.get(uuid_name=id_folder)
-    folder.count-=1
-    folder.save()
-    logger.warning("пользователь "+request.user.username+" удалил документ "+file.name)
-    file.document.delete()
-    file.delete()
-    return redirect('/'+str(folder.get_uuid()))
+    try:
+        document = Document.objects.get(uuid_name=id_file)
+        folder = document.group_uuid
+        assert str(folder.uuid_name) == str(id_folder), "возможен перебор директорий!"
+        folder.count-=1
+        folder.save()
+        logger.warning("пользователь "+request.user.username+" удалил документ "+document.name)
+        document.document.delete()
+        document.delete()
+        return redirect('/'+str(id_folder))
+    except Exception as ex:
+        logger.warning("пользователь "+request.user.username+" попытался удалить файл, \""+str(id_folder)+'/'+str(id_file) + "\" "+str(ex) + " возможен перебор директорий!")
+        return redirect('/')
    
 
 @permission_required('website.add_groupdocuments', raise_exception=True)

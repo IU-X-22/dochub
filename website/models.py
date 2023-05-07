@@ -28,6 +28,7 @@ class Document(models.Model):
     description = models.TextField()
     text = models.TextField()
     is_readed = models.BooleanField(default=False)
+    is_moderated =  models.BooleanField(default=False)
     datetime = models.DateTimeField()
     group_uuid = models.ForeignKey(
         'GroupDocuments', on_delete=models.PROTECT)
