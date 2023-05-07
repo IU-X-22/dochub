@@ -31,7 +31,6 @@ def ParseFileThread():
             document.text = text
             document.is_readed = True
             document.save()
-            print("end.")
             image_queue.task_done()
 
 num_threads =int(os.environ.get("NUM_THREADS", default=1))          

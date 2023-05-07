@@ -80,10 +80,6 @@ LOGGING = {
             'format': '{levelname} {asctime}  {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
     },
     'handlers': {
         'file': {

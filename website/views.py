@@ -12,6 +12,7 @@ import hashlib
 import psutil
 import threading
 import logging
+from faker import Faker
 from website.thread import add_image
 import os
 from pathlib import Path
@@ -26,51 +27,70 @@ logger = logging.getLogger(__name__)
 
 @permission_required('website.view_document', raise_exception=True)
 def file_in_browser_open(request, id_folder, id_file):
-    document = Document.objects.get(uuid_name=id_file)
     try:
+        document = Document.objects.get(uuid_name=id_file)
+        assert str(document.group_uuid.uuid_name) == str(id_folder), "возможен перебор директорий!"
         logger.warning("пользователь "+request.user.username+" открыл файл "+document.name)
         return FileResponse(open(unquote(document.get_url()[1:]), 'rb'),
-                            content_type='application/pdf')
-
-    except FileNotFoundError:
-        logger.warning("пользователь "+request.user.username+" попытался открыл файл, которого нет :"+document.name)
+                                content_type='application/pdf')
+    except Exception as ex:
+        logger.warning("пользователь "+request.user.username+" попытался открыл файл :"+str(id_folder)+'/'+str(id_file) + " "+str(ex) + " возможен перебор директорий!")
         return redirect('/')
-
 
 
 @xframe_options_sameorigin
 @permission_required('website.edit_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
-    folder = GroupDocuments.objects.get(uuid_name=id_folder)
-    file = Document.objects.get(uuid_name=id_file)
-    context = {
+    try:
+        document = Document.objects.get(uuid_name=id_file)
+        folder = document.group_uuid
+        assert str(folder.uuid_name) == str(id_folder), "возможен перебор директорий!"
+        context = {
         'folder': folder,
-        'document': file,
-        'doc_url': '/'+str(folder.uuid_name)+'/'+str(file.uuid_name)
-    }
-    logger.warning("пользователь "+request.user.username+" открыл страницу с файлом \""+file.name+ "\" в папке "+folder.name)
-    response = render(request, 'one_file.html', context)
-    return response
+        'document': document,
+        'doc_url': '/'+str(folder.uuid_name)+'/'+str(document.uuid_name)
+        }
+        logger.warning("пользователь "+request.user.username+" открыл страницу с файлом \""+str(document.name)+ "\" в папке "+str(folder.name))
+        response = render(request, 'one_file.html', context)
+        return response
+    except Exception as ex:
+        logger.warning("пользователь "+request.user.username+" попытался открыл файл, \""+str(id_folder)+'/'+str(id_file) + "\" "+str(ex) + " возможен перебор директорий!")
+        return redirect('/')
+
+
 @permission_required('website.edit_document', raise_exception=True)
 def edit_file_text(request,id_folder, id_file):
-    file = Document.objects.get(uuid_name=id_file)
     if request.method == 'POST':
-        file.text = str(request.POST.get('text'))
-        logger.warning("пользователь "+request.user.username+" изменил содержание файла "+file.name)
-        file.save()
-        return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
+        try:
+            document = Document.objects.get(uuid_name=id_file)
+            folder = document.group_uuid
+            assert str(folder.uuid_name) == str(id_folder), "возможен перебор директорий!"
+            document.text = str(request.POST.get('text'))
+            logger.warning("пользователь "+request.user.username+" изменил содержание файла "+document.name)
+            document.save()
+            return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
+        except Exception as ex:
+            logger.warning("пользователь "+request.user.username+" попытался открыл файл, \""+str(id_folder)+'/'+str(id_file) + "\" "+str(ex) + " возможен перебор директорий!")
+            return redirect('/')
     else:
-         logger.warning("пользователь "+ request.user.username+" зашел на страницу редактирования документа "+file.name+" без полезной нагрузки! Возможен перебор директорий!")
+         logger.warning("пользователь "+ request.user.username+" зашел на страницу редактирования документа \""+str(id_folder)+'/'+str(id_file) + "\" без полезной нагрузки! Возможен перебор директорий!")
          return redirect('/'+str(id_folder)+'/'+str(id_file))
         
 @login_required(login_url='/login/')
+@permission_required('website.view_document', raise_exception=True)
 def one_folder(request, id_folder):
-    folder = GroupDocuments.objects.get(uuid_name=id_folder)
-    context = {
-        'folder': folder,
-        'folders': [folder],
-        'documents':Document.objects.filter(group_uuid=id_folder)
-    }
+    context = {}
+    try:
+        folder = GroupDocuments.objects.get(uuid_name=id_folder)
+        context = {
+            'folder': folder,
+            'folders': [folder],
+            'documents':Document.objects.filter(group_uuid=id_folder)
+        }
+    except Exception as ex:
+        logger.warning("пользователь "+request.user.username+" попытался открыл папку, \""+str(id_folder) + "\" "+str(ex) + " возможен перебор директорий!")
+        return redirect('/')
+
     if request.method == "GET":
         sort= request.GET.get('sortby') #request.GET['sortby']
         if str(sort)=='toname':
@@ -91,28 +111,33 @@ def one_folder(request, id_folder):
 
 @permission_required('website.add_document', raise_exception=True)
 def add_document(request): 
-    if request.method == 'POST':
-        file_path = request.FILES.get('path')
-        file_name = request.POST.get('name')
-        file_ext = '.pdf'
-        file_description = request.POST.get('description')
-        folder=GroupDocuments.objects.get(name=request.POST.get('folder'))
-        folder.count+=1
-        folder.save()
-        file_path.name = str(
-            hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext 
-        document = Document(document=file_path, name=file_name,
-                            datetime=datetime.now(timezone(timedelta(hours=+3))
-                                                  ).strftime(
-                                                    '%Y-%m-%d %H:%M:%S'),
-                            group_folder=folder, description=file_description,
-                            group_uuid=folder.get_uuid())
-        document.save()
-        logger.warning("пользователь "+request.user.username+" загрузил документ "+file_name)
-        add_image(document)
-        return redirect('/'+str(folder.get_uuid()))
-    else:
-        logger.warning("пользователь "+request.user.username+" зашел на страницу добавления документа без полезной нагрузки! Возможен перебор директорий!")
+    try:
+        if request.method == 'POST':
+            file_path = request.FILES.get('path')
+            file_name = request.POST.get('name')
+            file_ext = '.pdf'
+            file_description = request.POST.get('description')
+            folder=GroupDocuments.objects.get(name=request.POST.get('folder'))
+            folder.count+=1
+            folder.save()
+            fake = Faker()
+            for _ in range(1000):
+                file_path.name = str(
+                    hashlib.sha256(file_name.encode('utf-8')).hexdigest()) +file_ext 
+                document = Document(document=file_path, name=fake.name(),
+                                    datetime=datetime.now(timezone(timedelta(hours=+3))
+                                                        ).strftime(
+                                                            '%Y-%m-%d %H:%M:%S'), description=fake.text,
+                                    group_uuid=folder)
+                document.save()
+                logger.warning("пользователь "+request.user.username+" загрузил документ "+file_name)
+            #add_image(document)
+            return redirect('/'+str(folder.get_uuid()))
+        else:
+            logger.warning("пользователь "+request.user.username+" зашел на страницу добавления документа без полезной нагрузки! Возможен перебор директорий!")
+            return redirect('/')
+    except Exception as ex:
+        logger.warning("пользователь "+request.user.username+" ошибка добавления документа "+str(ex))
         return redirect('/')
     
 @permission_required('website.delete_document', raise_exception=True)
@@ -137,7 +162,6 @@ def add_folder(request):
             folder.save()
             logger.warning("пользователь "+request.user.username+" создал папку "+folder_name)
         except Exception as ex:
-            messages.error(request, 'Некоректное название папки!')
             logger.warning("пользователь "+request.user.username+" ошибка при создании попки "+str(ex))
     else:
         logger.warning("пользователь "+request.user.username+" зашел на страницу создания папки без полезной нагрузки! Возможен перебор директорий!")
@@ -150,11 +174,15 @@ def search_query(request):
         'year': str(datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
     if request.method == "POST":
         query = request.POST.get('search')
-        search_query = SearchQuery(query)
-        search_vector = SearchVector("name","text","description")
-        context.update({'documents' :  Document.objects.annotate(search=search_vector,rank=SearchRank(search_vector,search_query)).filter(search=search_query).order_by('-rank')
+        if str(query) == '':
+            logger.warning("пользователь "+request.user.username+" осуществил пустой поиск! Возможна атака!")
+            return redirect('/')
+        else:
+            search_query = SearchQuery(query)
+            search_vector = SearchVector("name","text","description")
+            context.update({'documents' :  Document.objects.annotate(search=search_vector,rank=SearchRank(search_vector,search_query)).filter(search=search_query).order_by('-rank')
 })
-    logger.warning("пользователь "+request.user.username+" осуществил поиск: "+query)
+    logger.warning("пользователь "+request.user.username+" осуществил поиск: "+str(query))
     response = render(request, 'documents.html', context)
     return response
         
