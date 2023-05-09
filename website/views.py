@@ -6,17 +6,11 @@ from django.db.models import Q
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseNotFound
-from django.http import FileResponse
-import hashlib
-import psutil
-import threading
-import logging
-from faker import Faker
+from django.http import HttpResponseNotFound , FileResponse
 from website.thread import add_image
-import os
+import hashlib
+import logging
 from pathlib import Path
-from .thread import ParseFileThread
 from datetime import datetime, timezone, timedelta
 from website.models import Document, GroupDocuments
 
@@ -24,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
  # ***.all().only('name'm'value') динамически подгружает остальные
  #***.all().valuse('name') {'val': 1} быстрее, но не подгружает остальные
-
+@login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def file_in_browser_open(request, id_folder, id_file):
     try:
@@ -37,7 +31,7 @@ def file_in_browser_open(request, id_folder, id_file):
         logger.warning("пользователь "+request.user.username+" попытался открыл файл :"+str(id_folder)+'/'+str(id_file) + " "+str(ex) + " возможен перебор директорий!")
         return redirect('/')
 
-
+@login_required(login_url='/login/')
 @xframe_options_sameorigin
 @permission_required('website.edit_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
@@ -57,7 +51,7 @@ def one_file(request, id_folder, id_file):
         logger.warning("пользователь "+request.user.username+" попытался открыл файл, \""+str(id_folder)+'/'+str(id_file) + "\" "+str(ex) + " возможен перебор директорий!")
         return redirect('/')
 
-
+@login_required(login_url='/login/')
 @permission_required('website.edit_document', raise_exception=True)
 def edit_file_text(request,id_folder, id_file):
     if request.method == 'POST':
@@ -109,7 +103,7 @@ def one_folder(request, id_folder):
     response = render(request, 'documents.html', context)
     return response
 
-
+@login_required(login_url='/login/')
 @permission_required('website.add_document', raise_exception=True)
 def add_document(request): 
     try:
@@ -141,7 +135,8 @@ def add_document(request):
     except Exception as ex:
         logger.warning("пользователь "+request.user.username+" ошибка добавления документа "+str(ex))
         return redirect('/')
-    
+
+@login_required(login_url='/login/')   
 @permission_required('website.delete_document', raise_exception=True)
 def delete_document(request,id_folder,id_file): 
     try:
@@ -158,7 +153,7 @@ def delete_document(request,id_folder,id_file):
         logger.warning("пользователь "+request.user.username+" попытался удалить файл, \""+str(id_folder)+'/'+str(id_file) + "\" "+str(ex) + " возможен перебор директорий!")
         return redirect('/')
    
-
+@login_required(login_url='/login/')
 @permission_required('website.add_groupdocuments', raise_exception=True)
 def add_folder(request):
     if request.method == 'POST':
@@ -174,6 +169,7 @@ def add_folder(request):
         logger.warning("пользователь "+request.user.username+" зашел на страницу создания папки без полезной нагрузки! Возможен перебор директорий!")
     return redirect('/')
 
+@login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def search_query(request):
     context = {
@@ -215,6 +211,7 @@ def main_page(request):
        context.update({'folders' :  GroupDocuments.objects.all()})    
     response = render(request, 'folders.html', context)
     return response
+
 
 def login_page(request):
     if request.method == 'POST':
