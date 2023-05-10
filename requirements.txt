@@ -3,4 +3,4 @@ Django-admin
 psycopg2-binary
 psutil
 pdf2image
-easyocr
+opencv-contrib-python==4.5.5.62
