@@ -4,13 +4,13 @@ import psutil
 import os
 import pdf2image
 import tempfile
-import math
 from queue import Queue
 import logging
 import threading
 BASE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
 image_queue = Queue()
+
 
 def ParseFileThread():
     p = psutil.Process(os.getpid())
@@ -26,18 +26,19 @@ def ParseFileThread():
             for i in sorted(os.listdir(path)):
                 logger.warning("обработка " + i)
                 text += ''.join(reader.readtext(
-                    os.path.join(path, i), detail=0, paragraph=True)) #workers=1
-                text+=' '
+                    os.path.join(path, i), detail=0, paragraph=True))
+                text += ' '
             document.text = text
             document.is_readed = True
             document.save()
-            logger.warning("конец обработки файла " +document.name)
+            logger.warning("конец обработки файла " + document.name)
             image_queue.task_done()
 
-num_threads =int(os.environ.get("NUM_THREADS", default=1))          
+
+num_threads = int(os.environ.get("NUM_THREADS", default=1))
 for _ in range(num_threads):
     t = threading.Thread(target=ParseFileThread,)
-    t.daemon=True
+    t.daemon = True
     t.start()
 
 
