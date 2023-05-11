@@ -1,4 +1,3 @@
-<!-- Modal File -->
 <div class="modal fade" id="AddFileModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -9,38 +8,48 @@
         <div class="modal-body">
           <form action="/add_document/"  enctype="multipart/form-data" method="post">
             {% csrf_token %}
-            <div class="input-group mb-3">
-              <div class="input-group mb-3">
-                <input name="path" type="file" accept="application/pdf" class="form-control" id="InputDocument" required>
-              </div>
-            </div>
-            <div class="input-group mb-3">
-              <label for="basic-url" class="input-group-text">Имя файла</label>
-              <input name="name" type="text" class="form-control" id="fname" placeholder="отчет1.pdf"
-                aria-label="отчет1.pdf" aria-describedby="basic-addons1" required onkeyup=" Notvalid() ">
-            </div>
-            <div class="input-group mb-3">
-              <label for="basic-url" class="input-group-text">Описание файла</label>
-              <textarea name="description" class="form-control" aria-label="With textarea"></textarea>
-            </div>
-            <div class="form-check form-switch">
-            <input name = "recognise" class="form-check-input" value="1" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
-            <label class="form-check-label" for="flexSwitchCheckChecked">Распознавать текст</label>
-          </div>
-            <div class="input-group mb-3">
-              <label for="basic-url" class="input-group-text">Укажите папку</label>
-              <select class="form-select" name = "folder" aria-label="Default select example">
-                {% for folder in folders %}
-
-                  {% if current_folder == folder %}
-                  <option selected value="{{folder}}">{{folder}}</option>
-                  {% else %}
-                  <option   value="{{folder}}">{{folder}}</option>
-                  {% endif %}
-
-                {% endfor %}
-              </select>
-            </div>
+            <table class="table table-striped-columns justify-content-start" style="width: 100%">
+                <tr class="mb-3">
+                    <td class="text-end ms-3">Файл</td>
+                    <td>
+                        <input name="path" type="file" accept="application/pdf" class="form-control" id="InputDocument" required>
+                    </td>
+                </tr>
+                <tr class="mb-3">
+                    <td class="text-end ms-3">Имя файла</td>
+                    <td>
+                        <input name="name" type="text" class="form-control" id="fname" placeholder="Файл.pdf"
+                        aria-label="Файл.pdf" aria-describedby="basic-addons1" required onkeyup="NotValid()">
+                    </td>
+                </tr>
+                <tr class="mb-3">
+                    <td class="text-end ms-3">Описание файла</td>
+                    <td>
+                        <textarea name="description" class="form-control" aria-label="File Description"></textarea>
+                    </td>
+                </tr>
+                <tr class="mb-3">
+                    <td class="text-end ms-3">Распознование текста</td>
+                    <td>
+                        <input name="recognise" class="form-check-input" value="1" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                        <label class="form-check-label" for="flexSwitchCheckChecked">Распознавать текст</label>
+                    </td>
+                </tr>
+                <tr class="mb-3">
+                    <td class="text-end ms-3">Папка</td>
+                    <td>
+                        <select class="form-select" name="folder" aria-label="Folder">
+                        {% for folder in folders %}
+                          {% if current_folder == folder %}
+                          <option selected value="{{folder}}">{{folder}}</option>
+                          {% else %}
+                          <option   value="{{folder}}">{{folder}}</option>
+                          {% endif %}
+                        {% endfor %}
+                      </select>
+                    </td>
+                </tr>
+            </table>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>

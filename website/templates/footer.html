@@ -4,7 +4,7 @@
       document.querySelector("#fname").value=fileName;
     });
 
-    function Notvalid() {
+    function NotValid() {
       const yratext = /[<|>]/gm;
       let filename = document.querySelector('#fname');
       if (yratext.test(filename.value)) {

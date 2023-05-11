@@ -13,10 +13,13 @@
   <link href="{% static 'bootstrap.min.css' %}" rel="stylesheet">
 </head>
 <header class="p-3 mb-3 border-bottom bg-secondary">
-  <div class="container">
+  <div class="container d-flex flex-row justify-content-between">
     <a href="/" class="text-light text-decoration-none">
       <i class="bi bi-house"></i> 
     </a>
+    <p class="text-light fst-italic mb-0">
+        {{ request.user.username }}
+    </p>
   </div>
 </header>
 <div class="container-sm">

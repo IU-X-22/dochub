@@ -1,25 +1,23 @@
 {% include 'header.html' %}
 
-    <div aria-label="breadcrumb mb-3">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item" aria-current="page"><a href="/">Главная</a></li>
-          <li class="breadcrumb-item" aria-current="page"><a href="/{{folder.uuid_name}}">{{folder.name}}</a></li>
-          <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
-        </ol>
-    </div>
-     <form action="/{{folder.uuid_name}}/{{document.uuid_name}}/edit" method="post">
-            {% csrf_token %}
-    <div class="form-control d-flex flex-row gap-2">
-        <input type="text"  name = "text" class="form-control" id="info" style="max-height: 600px; word-wrap: break-word; overflow: scroll;" value = "{{document.text}}">
-    <!--        {% if document.is_readed == True %}
-                {{document.text}}
-            {% else %}
-            Файл обрабатывается, подождите. Если этот процесс продолжается более 5 минут, то обратитесь к системному администратору.
-            {% endif %}-->
-        </input>
+<div aria-label="breadcrumb mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" aria-current="page"><a href="/">Главная</a></li>
+        <li class="breadcrumb-item" aria-current="page"><a href="/{{folder.uuid_name}}">{{folder.name}}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
+    </ol>
+</div>
+<form action="/{{folder.uuid_name}}/{{document.uuid_name}}/edit" method="post">
+    {% csrf_token %}
+    <div class="form-control d-flex flex-row gap-2 mb-1">
+        <textarea name = "text" class="form-control" id="info" style="resize: none; height: 600px; word-wrap: break-word; overflow: scroll;" value = "{{document.text}}"></textarea>
         <object width="100%" height="600px" style="overflow: scroll;" data="{{doc_url}}" type="application/pdf" ></object>
     </div>
-    
-     <button type="submit" >Сохранить</button>
-     </form>
-</div>
+    <div class="btn-tooltip">
+        <input type="submit" class="btn btn-primary" value="Сохранить"></input>
+        <a class="btn btn-danger" href="">Отменить изменения</a>
+        <a class="btn btn-secondary" href="">Запустить распознование текста</a> <!-- я не нашёл реализацию перезапуска, поэтому оставил так. -->
+    </div>
+</form>
+
+</div> <!-- Нужно закрывать div, оставленный в header.html -->

@@ -16,14 +16,30 @@
     <table class="table" style="  table-layout: fixed; width:100% ">
       <thead>
         <tr>
-          <th scope="col">Название</th>
-          <th scope="col">Последнее изменение</th>
+          <th scope="col">
+          {% if request.GET.sortby == "fromname" %}
+            <a class="text-decoration-none text-dark" href="?sortby=toname">Название <i class="bi bi-arrow-down"></i></a>
+          {% elif request.GET.sortby == "toname" %}
+            <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
+          {% else %}
+            <a class="text-decoration-none text-dark" href="?sortby=fromname">Название</i></a>
+          {% endif %}
+          </th>
+          <th scope="col">
+          {% if request.GET.sortby == "fromtime" %}
+            <a class="text-decoration-none text-dark" href="?sortby=totime">Последнее изменение <i class="bi bi-arrow-down"></i></a>
+          {% elif request.GET.sortby == "totime" %}
+            <a class="text-decoration-none text-dark" href="?sortby=fromtime">Последнее изменение <i class="bi bi-arrow-up"></i></a>
+          {% else %}
+            <a class="text-decoration-none text-dark" href="?sortby=fromtime">Последнее изменение</i></a>
+          {% endif %}
+          </th>
           <th scope="col">Количество эл-ов</th>
         </tr>
       </thead>
       <tbody>
         {% for folder in folders %}
-          <tr onclick=' location.href = "/{{folder.uuid_name}}"'>
+          <tr onclick='location.href = "/{{folder.uuid_name}}"'>
             <td>{{folder.name}}</td>
             <td>{{folder.datetime |date:"d-m-Y H:i"}}</td>
             <td>{{folder.count}}</td>
