@@ -162,7 +162,7 @@ def add_folder(request):
             folder = GroupDocuments(name=folder_name, datetime=datetime.now(
                 timezone(timedelta(hours=+3))).strftime('%Y-%m-%d %H:%M:%S'))
             folder.save()
-            logger.warning("пользователь "+request.user.username+" создал папку "+folder_name)
+            logger.warning("пользователь "+request.user.username+" создал папку "+str(folder_name))
         except Exception as ex:
             logger.warning("пользователь "+request.user.username+" ошибка при создании папки "+str(ex))
     else:
