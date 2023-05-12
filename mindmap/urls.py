@@ -33,5 +33,6 @@ urlpatterns = [
     path('<uuid:id_folder>/<uuid:id_file>/info', views.one_file),
     path('<uuid:id_folder>/<uuid:id_file>/delete', views.delete_document),
     path('<uuid:id_folder>/<uuid:id_file>/edit', views.edit_file_text),
+    path('<uuid:id_folder>/<uuid:id_file>/recognise', views.recognise_file_text),
     # path('open_file/', views.open_file)
 ] + static(settings.DOCUMENT_URL, document_root=settings.DOCUMENT_ROOT)

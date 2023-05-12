@@ -5,6 +5,7 @@ import os
 import pdf2image
 import tempfile
 from queue import Queue
+from website.models import QueueStatus
 import logging
 import threading
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +30,14 @@ def ParseFileThread():
                     os.path.join(path, i), detail=0, paragraph=True))
                 text += ' '
             document.text = text
-            document.is_readed = True
+            document.read_status = 1
             document.save()
+            q = QueueStatus.objects.get()
+            q.actual_progress+=1    
+            if q.actual_progress==q.max_progress:
+                q.actual_progress=0
+                q.max_progress=0
+            q.save()
             logger.warning("конец обработки файла " + document.name)
             image_queue.task_done()
 

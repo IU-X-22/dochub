@@ -2,6 +2,7 @@ from urllib.parse import unquote
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
+from django.db.models import Q
 from django.contrib.postgres.search import (
     SearchVector, SearchQuery, SearchRank)
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -12,7 +13,7 @@ import hashlib
 import logging
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
-from website.models import Document, GroupDocuments
+from website.models import Document, GroupDocuments, QueueStatus
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
@@ -37,8 +38,7 @@ def file_in_browser_open(request, id_folder, id_file):
     except Exception as ex:
         logger.warning(
             f"пользователь {request.user.username} " +
-            f"попытался открыть файл : {id_folder}/{id_file} {ex}" +
-            " возможен перебор директорий!")
+            f"попытался открыть файл : {id_folder}/{id_file} {ex}")
         return redirect('/')
 
 
@@ -46,6 +46,7 @@ def file_in_browser_open(request, id_folder, id_file):
 @permission_required('website.edit_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
     try:
+        progress = QueueStatus.objects.get()
         document = Document.objects.get(uuid_name=id_file)
         folder = document.group_uuid
         check_bruteforce = str(folder.uuid_name) == str(id_folder)
@@ -55,6 +56,10 @@ def one_file(request, id_folder, id_file):
             'document': document,
             'doc_url': '/'+str(folder.uuid_name)+'/'+str(document.uuid_name)
         }
+        try:
+            context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
+        except:
+            context.update({'progress' : 0})   
         logger.warning(
             f"пользователь {request.user.username} " +
             f"открыл страницу с файлом \"{document.name}\"" +
@@ -64,9 +69,35 @@ def one_file(request, id_folder, id_file):
     except Exception as ex:
         logger.warning(
             f"пользователь {request.user.username} " +
-            f"попытался открыть файл : {id_folder}/{id_file} {ex} " +
-            "возможен перебор директорий!")
+            f"попытался открыть файл : {id_folder}/{id_file} {ex} ")
         return redirect('/')
+
+
+
+
+
+@login_required(login_url='/login/')
+@permission_required('website.edit_document', raise_exception=True)
+def recognise_file_text(request, id_folder, id_file):
+    try:
+        document = Document.objects.get(uuid_name=id_file)
+        folder = document.group_uuid
+        check_bruteforce = str(folder.uuid_name) == str(id_folder)
+        assert check_bruteforce, "возможен перебор директорий!"
+        document.read_status = 1
+        document.save()
+        q = QueueStatus.objects.get()
+        q.max_progress+=1    
+        q.save()
+        add_image(document)
+        return redirect('/'+str(id_folder))
+    except Exception as ex:
+        logger.warning(
+            f"пользователь {request.user.username} " +
+            f"попытался открыть файл : {id_folder}/{id_file} {ex} ")
+        return redirect('/')
+
+
 
 
 @login_required(login_url='/login/')
@@ -79,11 +110,11 @@ def edit_file_text(request, id_folder, id_file):
             check_bruteforce = str(folder.uuid_name) == str(id_folder)
             assert check_bruteforce, "возможен перебор директорий!"
             document.text = str(request.POST.get('text'))
-            document.is_moderated = True
+            document.read_status = 2
+            document.save()
             logger.warning(
                 f"пользователь {request.user.username} изменил" +
                 f"содержание файла {document.name})")
-            document.save()
             return redirect('/'+str(id_folder)+'/'+str(id_file)+'/info')
         except Exception as ex:
             logger.warning(
@@ -104,12 +135,17 @@ def edit_file_text(request, id_folder, id_file):
 def one_folder(request, id_folder):
     context = {}
     try:
+        progress = QueueStatus.objects.get()
         folder = GroupDocuments.objects.get(uuid_name=id_folder)
         context = {
             'folder': folder,
             'folders': [folder],
             'documents': Document.objects.filter(group_uuid=id_folder)
         }
+        try:
+            context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
+        except:
+            context.update({'progress' : 0})   
     except Exception as ex:
         logger.warning(
             f"пользователь {request.user.username} попытался открыть папку " +
@@ -125,12 +161,18 @@ def one_folder(request, id_folder):
         elif str(sort) == 'fromname':
             context.update(
                 {'documents': docs.order_by('name')[::-1]})
-        elif str(sort) == 'fromtime':
-            context.update(
-                {'documents': docs.order_by('-datetime')})
         elif str(sort) == 'totime':
             context.update(
+                {'documents': docs.order_by('-datetime')})
+        elif str(sort) == 'fromtime':
+            context.update(
                 {'documents': docs.order_by('-datetime')[::-1]})
+        elif str(sort) == 'tostatus':
+            context.update(
+                {'documents': docs.order_by('-read_status')})
+        elif str(sort) == 'fromstatus':
+            context.update(
+                {'documents': docs.order_by('-read_status')[::-1]})    
         else:
             context.update(
                 {'documents': docs})
@@ -154,8 +196,6 @@ def add_document(request):
             is_recognise = request.POST.get('recognise')
             folder = GroupDocuments.objects.get(
                 name=request.POST.get('folder'))
-            folder.count += 1
-            folder.save()
             file_name_hash = hashlib.sha256(file_name.encode('utf-8'))
             file_path.name = str(file_name_hash.hexdigest()) + file_ext
             document = Document(document=file_path, name=file_name,
@@ -165,13 +205,19 @@ def add_document(request):
                                 description=file_description,
                                 group_uuid=folder)
             document.save()
+            folder.count = Document.objects.filter(group_uuid=folder.uuid_name).count()
+            folder.save()
             logger.warning(
                 f"пользователь {request.user.username}" +
                 f"загрузил документ {file_name}")
             if is_recognise:
+                q = QueueStatus.objects.get()
+                q.max_progress+=1    
+                q.save()
                 add_image(document)
             else:
-                document.is_readed = True
+                document.read_status = 1
+                document.save()
             return redirect('/'+str(folder.get_uuid()))
         else:
             logger.warning(
@@ -194,13 +240,13 @@ def delete_document(request, id_folder, id_file):
         folder = document.group_uuid
         check_bruteforce = str(folder.uuid_name) == str(id_folder)
         assert check_bruteforce, "возможен перебор директорий!"
-        folder.count -= 1
-        folder.save()
         logger.warning(
             f"пользователь {request.user.username} " +
             f"удалил документ {document.name}")
         document.document.delete()
         document.delete()
+        folder.count = Document.objects.filter(group_uuid=folder.uuid_name).count()
+        folder.save()
         return redirect('/'+str(id_folder))
     except Exception as ex:
         logger.warning(
@@ -249,14 +295,7 @@ def search_query(request):
                 "осуществил пустой поиск! Возможна атака!")
             return redirect('/')
         else:
-            search_query = SearchQuery(query)
-            search_vector = SearchVector("name", "text", "description")
-            search_annotation = (
-                Document.objects.annotate(
-                    search=search_vector,
-                    rank=SearchRank(search_vector, search_query)))
-            context.update({'documents': search_annotation.filter(
-                search=search_query).order_by('-rank')})
+            context.update({'documents': Document.objects.filter(Q(text__search=query)  | Q(name__search=query) | Q(description__search=query)), "search"  : "True" })
     logger.warning(
         f"пользователь {request.user.username} " +
         f"осуществил поиск: {query}")
@@ -267,10 +306,15 @@ def search_query(request):
 @login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def main_page(request):
+    progress = QueueStatus.objects.get()
     context = {
         'folders': [],
         'year': str(
             datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
+    try:
+        context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
+    except:
+         context.update({'progress' : 0})   
     if request.method == "GET":
         sort = request.GET.get('sortby')  # request.GET['sortby']
         folders = GroupDocuments.objects.all()
@@ -294,15 +338,24 @@ def login_page(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        ip = ''
+        user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
+        if user_ip_address:
+            ip = user_ip_address.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
         user = authenticate(username=username, password=password)
         if user is None:
-            logger.warning("неудачный вход : "+username+" "+password)
+            logger.warning(f"неудачный вход : {username} {password} {ip}")
             messages.add_message(request, messages.ERROR,
                                  "Неправильный логин или пароль")
             return render(request, 'login.html')
         else:
+            if len(QueueStatus.objects.all())==0:
+                q = QueueStatus.objects.create(actual_progress=0,max_progress=0)
+                q.save()
             login(request, user)
-            logger.warning("пользователь " + username+" вошел в систему")
+            logger.warning(f"пользователь {username} вошел в систему {ip}")
             messages.add_message(request, messages.SUCCESS,
                                  "Авторизация успешна")
             return redirect('/')

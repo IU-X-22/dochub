@@ -24,10 +24,18 @@
               {% elif request.GET.sortby == "toname" %}
                 <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
               {% else %}
-                <a class="text-decoration-none text-dark" href="?sortby=fromname">Название</i></a>
+                <a class="text-decoration-none text-dark" href="?sortby=fromname">Название<i class="bi bi-arrow-up"></i></a>
               {% endif %}
             </th>
-            <th scope="col">Состояние</th>
+            <th scope="col">
+              {% if request.GET.sortby == "fromstatus" %}
+                <a class="text-decoration-none text-dark" href="?sortby=tostatus">Состояние <i class="bi bi-arrow-down"></i></a>
+              {% elif request.GET.sortby == "tostatus" %}
+                <a class="text-decoration-none text-dark" href="?sortby=fromstatus">Состояние <i class="bi bi-arrow-up"></i></a>
+              {% else %}
+                <a class="text-decoration-none text-dark" href="?sortby=fromstatus">Состояние <i class="bi bi-arrow-up"></i></a>
+              {% endif %}
+            </th>
             <th style="width:40%" scope="col">Описание</th>
             <th scope="col">
               {% if request.GET.sortby == "fromtime" %}
@@ -35,7 +43,7 @@
               {% elif request.GET.sortby == "totime" %}
                 <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления <i class="bi bi-arrow-up"></i></a>
               {% else %}
-                <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления</i></a>
+                <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления<i class="bi bi-arrow-up"></i></a>
               {% endif %}
             </th>
         </tr>
@@ -45,9 +53,9 @@
         <tr>
           <td style="word-wrap:break-word;" class="cutname">{{document.name}}</td>
           <td style="word-wrap:break-word;">
-            {% if document.is_readed is True and document.is_moderated is True %}
+            {% if document.read_status == 2  %}
                 <i class="bi bi-check text-success"></i> Готов
-            {% elif document.is_readed is True and document.is_moderated is not True %}
+            {% elif document.read_status == 1 %}
                 <i class="bi bi-circle-half text-warning"></i> Ожидает проверки
             {% else %}
                 <i class="bi bi-circle text-warning"></i> Обрабатывается
@@ -57,6 +65,17 @@
           <td style="word-wrap:break-word;">{{document.datetime |date:"d-m-Y H:i"}}</td>
           <td style="word-wrap:break-word;">
             {% csrf_token %}
+            {% if search != None %}
+            <div class="btn-group">
+              <a href = "/{{document.group_uuid.uuid_name}}/{{document.uuid_name}}" class="btn btn-primary"
+                aria-controls="offcanvasBottom"
+                ><i class="bi bi-eye"></i></a>
+              <a href = "/{{document.group_uuid.uuid_name}}/{{document.uuid_name}}/info" class="btn btn-secondary" 
+                aria-controls="offcanvasBottom" ><i class="bi bi-three-dots"></i></a>
+              <a href = "/{{document.group_uuid.uuid_name}}/{{document.uuid_name}}/delete" class="btn btn-danger"  
+                  aria-controls="offcanvasBottom" ><i class="bi bi-x"></i></a>
+            </div>
+            {% else %}
             <div class="btn-group">
               <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}" class="btn btn-primary"
                 aria-controls="offcanvasBottom"
@@ -66,6 +85,7 @@
               <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}/delete" class="btn btn-danger"  
                   aria-controls="offcanvasBottom" ><i class="bi bi-x"></i></a>
             </div>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

@@ -30,8 +30,13 @@ class Document(models.Model):
     name = models.TextField()
     description = models.TextField()
     text = models.TextField()
-    is_readed = models.BooleanField(default=False)
-    is_moderated = models.BooleanField(default=False)
+    read_status = models.IntegerField(default=0)
+    ''' 
+    0 - обрабатывается
+    1 - Ожидает проверки
+    2 - готов
+
+    '''
     datetime = models.DateTimeField()
     group_uuid = models.ForeignKey(
         'GroupDocuments', on_delete=models.PROTECT)
@@ -45,3 +50,7 @@ class Document(models.Model):
 
 class CustomUser(AbstractUser):
     position = models.TextField()
+
+class QueueStatus(models.Model):
+    max_progress = models.IntegerField(default=0)
+    actual_progress = models.IntegerField(default=0)

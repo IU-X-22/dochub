@@ -85,7 +85,7 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': 'dochub.log',
+            'filename': 'logs/dochub.log',
             'formatter': 'verbose'
         },
     },

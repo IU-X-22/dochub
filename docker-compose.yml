@@ -10,7 +10,8 @@ services:
              python3 manage.py runserver 0.0.0.0:8000"
     image: kosten19/dochub
     volumes:
-      - file_system_data:/dochub/documents/
+      - file_system_data:/home/moderator/documents/
+      - dochub_logs:/home/moderator/logs/
     ports:
       - 8000:8000
     env_file:
@@ -30,3 +31,4 @@ services:
 volumes:
   file_system_data:
   postgres_data:
+  dochub_logs:

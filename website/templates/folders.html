@@ -22,7 +22,7 @@
           {% elif request.GET.sortby == "toname" %}
             <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
           {% else %}
-            <a class="text-decoration-none text-dark" href="?sortby=fromname">Название</i></a>
+            <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
           {% endif %}
           </th>
           <th scope="col">
@@ -31,7 +31,7 @@
           {% elif request.GET.sortby == "totime" %}
             <a class="text-decoration-none text-dark" href="?sortby=fromtime">Последнее изменение <i class="bi bi-arrow-up"></i></a>
           {% else %}
-            <a class="text-decoration-none text-dark" href="?sortby=fromtime">Последнее изменение</i></a>
+            <a class="text-decoration-none text-dark" href="?sortby=fromtime">Последнее изменение <i class="bi bi-arrow-up"></i></a>
           {% endif %}
           </th>
           <th scope="col">Количество эл-ов</th>

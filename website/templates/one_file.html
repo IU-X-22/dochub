@@ -10,14 +10,15 @@
 <form action="/{{folder.uuid_name}}/{{document.uuid_name}}/edit" method="post">
     {% csrf_token %}
     <div class="form-control d-flex flex-row gap-2 mb-1">
-        <textarea name = "text" class="form-control" id="info" style="resize: none; height: 600px; word-wrap: break-word; overflow: scroll;" value = "{{document.text}}"></textarea>
+        <textarea name = "text" class="form-control" id="info" style="resize: none; height: 600px; word-wrap: break-word; overflow: scroll;">{{document.text}}
+        </textarea>
         <object width="100%" height="600px" style="overflow: scroll;" data="{{doc_url}}" type="application/pdf" ></object>
     </div>
     <div class="btn-tooltip">
         <input type="submit" class="btn btn-primary" value="Сохранить"></input>
-        <a class="btn btn-danger" href="">Отменить изменения</a>
-        <a class="btn btn-secondary" href="">Запустить распознование текста</a> <!-- я не нашёл реализацию перезапуска, поэтому оставил так. -->
+        <a class="btn btn-danger" href="/{{folder.uuid_name}}/{{document.uuid_name}}/info">Отменить изменения</a>
+        <a class="btn btn-secondary" href="/{{folder.uuid_name}}/{{document.uuid_name}}/recognise">Запустить распознование текста</a> 
     </div>
 </form>
 
-</div> <!-- Нужно закрывать div, оставленный в header.html -->
+</div> 
