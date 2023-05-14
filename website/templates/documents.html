@@ -61,7 +61,7 @@
                 <i class="bi bi-circle text-warning"></i> Обрабатывается
             {% endif %}
           </td>
-          <td style="word-wrap:break-word;" class="cutdesc">{{document.description}}</td>
+          <td style="word-wrap:break-word;" class="cutdesc">{{ document.headline |safe }}</td>
           <td style="word-wrap:break-word;">{{document.datetime |date:"d-m-Y H:i"}}</td>
           <td style="word-wrap:break-word;">
             {% csrf_token %}

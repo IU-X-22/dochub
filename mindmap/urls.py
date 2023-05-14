@@ -29,6 +29,7 @@ urlpatterns = [
     path('add_folder/', views.add_folder),
     path('search/', views.search_query),
     path('<uuid:id_folder>', views.one_folder),
+    path('<uuid:id_folder>/search', views.search_in_folder_query),
     path('<uuid:id_folder>/<uuid:id_file>', views.file_in_browser_open),
     path('<uuid:id_folder>/<uuid:id_file>/info', views.one_file),
     path('<uuid:id_folder>/<uuid:id_file>/delete', views.delete_document),

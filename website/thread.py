@@ -5,7 +5,8 @@ import os
 import pdf2image
 import tempfile
 from queue import Queue
-from website.models import QueueStatus
+from website.models import QueueStatus, Document
+from django.contrib.postgres.search import SearchVector
 import logging
 import threading
 BASE_DIR = Path(__file__).resolve().parent.parent

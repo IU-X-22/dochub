@@ -31,7 +31,11 @@
   </div>
 </header>
 <div class="container-sm">
-  <form action="/search/" method="post">
+{% if folder != None %}
+  <form action="{{folder.uuid_name}}/search" method="post">
+{% else %}
+<form action="/search/" method="post">
+{% endif %}
     {% csrf_token %}
     <div class="input-group mb-3">
       <input type="text" name="search" class="form-control" placeholder="Поиск"

@@ -2,9 +2,9 @@ from urllib.parse import unquote
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q,F
 from django.contrib.postgres.search import (
-    SearchVector, SearchQuery, SearchRank)
+    SearchVector, SearchQuery, SearchRank, SearchHeadline)
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.contrib.auth import authenticate, login, logout
 from django.http import FileResponse
@@ -22,8 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 @login_required(login_url='/login/')
-@xframe_options_sameorigin
 @permission_required('website.view_document', raise_exception=True)
+@xframe_options_sameorigin
 def file_in_browser_open(request, id_folder, id_file):
     try:
         document = Document.objects.get(uuid_name=id_file)
@@ -84,10 +84,10 @@ def recognise_file_text(request, id_folder, id_file):
         folder = document.group_uuid
         check_bruteforce = str(folder.uuid_name) == str(id_folder)
         assert check_bruteforce, "возможен перебор директорий!"
-        document.read_status = 1
+        document.read_status = 0
         document.save()
         q = QueueStatus.objects.get()
-        q.max_progress+=1    
+        q.max_progress+=1
         q.save()
         add_image(document)
         return redirect('/'+str(id_folder))
@@ -283,25 +283,68 @@ def add_folder(request):
 @login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def search_query(request):
-    context = {
-        'folders': GroupDocuments.objects.all(),
-        'year': str(
-            datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
-    if request.method == "POST":
-        query = request.POST.get('search')
-        if str(query) == '':
-            logger.warning(
-                f"пользователь {request.user.username} " +
-                "осуществил пустой поиск! Возможна атака!")
-            return redirect('/')
-        else:
-            context.update({'documents': Document.objects.filter(Q(text__search=query)  | Q(name__search=query) | Q(description__search=query)), "search"  : "True" })
-    logger.warning(
-        f"пользователь {request.user.username} " +
-        f"осуществил поиск: {query}")
-    response = render(request, 'documents.html', context)
-    return response
+    try:
+        context = {
+            'folders': GroupDocuments.objects.all(),
+            'year': str(
+                datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
+        if request.method == "POST":
+            query = request.POST.get('search')
+            if str(query) == '':
+                logger.warning(
+                    f"пользователь {request.user.username} " +
+                    "осуществил пустой поиск! Возможна атака!")
+                return redirect('/')
+            else:
+                search_query = SearchQuery(query,config='russian')
+                logger.warning(f"search {search_query}")
+                search_headline = SearchHeadline(F('text'), search_query,config='russian')
+                documents =  Document.objects.filter(Q(text__icontains=query)  | Q(name__icontains=query) | Q(description__icontains=query)).annotate(headline=search_headline)
+                context.update({'documents':documents , "search"  : "True" })
+        logger.warning(
+            f"пользователь {request.user.username} " +
+            f"осуществил поиск: {query}")
+        response = render(request, 'documents.html', context)
+        return response
+    except Exception as ex:
+        logger.warning(
+            f"пользователь {request.user.username} " +
+            f"ошибка поиска:  {ex}")
+        return redirect('/')
 
+
+@login_required(login_url='/login/')
+@permission_required('website.view_document', raise_exception=True)
+def search_in_folder_query(request,id_folder):
+    try:
+        folder = GroupDocuments.objects.get(uuid_name=id_folder)
+        context = {
+                'folders': [folder],
+                'folder': folder,
+                'year': str(
+                    datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
+        if request.method == "POST":
+            query = request.POST.get('search')
+            if str(query) == '':
+                logger.warning(
+                        f"пользователь {request.user.username} " +
+                        "осуществил пустой поиск в папке {folder.name}! Возможна атака!")
+                return redirect('/')
+            else:
+                search_query = SearchQuery(query,config='russian')
+                search_headline = SearchHeadline(F('text'), search_query,config='russian')
+                documents =  Document.objects.filter(Q(group_uuid=folder.uuid_name) & ( Q(text__icontains=query)  | Q(name__icontains=query) | Q(description__icontains=query))).annotate(headline=search_headline)
+                context.update({'documents':documents , "search"  : "True" })
+        logger.warning(
+                f"пользователь {request.user.username} " +
+                f"осуществил поиск: {query} в папке {folder}")
+        response = render(request, 'documents.html', context)
+        return response
+    except Exception as ex:
+        logger.warning(
+            f"пользователь {request.user.username} " +
+            f"ошибка поиска {ex}")
+        return redirect('/')    
 
 @login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
@@ -338,15 +381,12 @@ def login_page(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        ip = ''
         user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
-        if user_ip_address:
-            ip = user_ip_address.split(',')[0]
-        else:
-            ip = request.META.get('REMOTE_ADDR')
+        ip_1 = user_ip_address.split(',')[0]
+        ip_2 = request.META.get('REMOTE_ADDR')
         user = authenticate(username=username, password=password)
         if user is None:
-            logger.warning(f"неудачный вход : {username} {password} {ip}")
+            logger.warning(f"неудачный вход : {username} {password} {ip_1} or {ip_2}")
             messages.add_message(request, messages.ERROR,
                                  "Неправильный логин или пароль")
             return render(request, 'login.html')
