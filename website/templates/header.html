@@ -32,7 +32,7 @@
 </header>
 <div class="container-sm">
 {% if folder != None %}
-  <form action="{{folder.uuid_name}}/search" method="post">
+  <form action="/{{folder.uuid_name}}/search" method="post">
 {% else %}
 <form action="/search/" method="post">
 {% endif %}
