@@ -36,7 +36,7 @@
                 <a class="text-decoration-none text-dark" href="?sortby=fromstatus">Состояние <i class="bi bi-arrow-up"></i></a>
               {% endif %}
             </th>
-            <th style="width:40%" scope="col">Описание</th>
+            <th style="width:40%" scope="col"></th>
             <th scope="col">
               {% if request.GET.sortby == "fromtime" %}
                 <a class="text-decoration-none text-dark" href="?sortby=totime">Дата добавления <i class="bi bi-arrow-down"></i></a>
@@ -46,6 +46,8 @@
                 <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления<i class="bi bi-arrow-up"></i></a>
               {% endif %}
             </th>
+            <th>
+            </th>
         </tr>
       </thead>
       <tbody>
@@ -54,11 +56,17 @@
           <td style="word-wrap:break-word;" class="cutname">{{document.name}}</td>
           <td style="word-wrap:break-word;">
             {% if document.read_status == 2  %}
-                <i class="bi bi-check text-success"></i> Готов
+                <p data-bs-toggle="tooltip" data-bs-title="Файл полностью проверен и готов к просмотру">
+                    <i class="bi bi-check text-success"></i> Готов
+                </p>
             {% elif document.read_status == 1 %}
-                <i class="bi bi-circle-half text-warning"></i> Ожидает проверки
+                <p data-bs-toggle="tooltip" data-bs-title="Файл ожидает проверки модератором">
+                    <i class="bi bi-circle-half text-warning"></i> Ожидает проверки
+                </p>
             {% else %}
-                <i class="bi bi-circle text-warning"></i> Обрабатывается
+                <p data-bs-toggle="tooltip" data-bs-title="Файл обрабатывается системой">
+                    <i class="bi bi-circle text-warning"></i> Обрабатывается
+                </p>
             {% endif %}
           </td>
           <td style="word-wrap:break-word;" class="cutdesc">{{ document.headline |safe }}</td>
@@ -79,6 +87,7 @@
             <div class="btn-group">
               <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}" class="btn btn-primary"
                 aria-controls="offcanvasBottom"
+                data-bs-toggle="t"
                 ><i class="bi bi-eye"></i></a>
               <a href = "/{{folder.uuid_name}}/{{document.uuid_name}}/info" class="btn btn-secondary" 
                 aria-controls="offcanvasBottom" ><i class="bi bi-three-dots"></i></a>
