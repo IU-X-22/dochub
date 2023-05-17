@@ -4,7 +4,20 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item" aria-current="page"><a href="/">Главная</a></li>
         <li class="breadcrumb-item" aria-current="page"><a href="/{{folder.uuid_name}}">{{folder.name}}</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{file}}</li>
+        <li class="breadcrumb-item active" aria-current="page">{{document.name}}</li>
+        {% if document.read_status == 2  %}
+            <li class="breadcrumb-item" data-bs-toggle="tooltip" data-bs-title="Файл полностью проверен и готов к просмотру">
+                <i class="bi bi-check text-success"></i> Готов
+            </li>
+        {% elif document.read_status == 1 %}
+            <li class="breadcrumb-item" data-bs-toggle="tooltip" data-bs-title="Файл ожидает проверки модератором">
+                <i class="bi bi-circle-half text-warning"></i> Ожидает проверки
+            </li>
+        {% else %}
+            <li class="breadcrumb-item" data-bs-toggle="tooltip" data-bs-title="Файл обрабатывается системой">
+                <i class="bi bi-circle text-warning"></i> Обрабатывается
+            </li>
+        {% endif %}
     </ol>
 </div>
 <form action="/{{folder.uuid_name}}/{{document.uuid_name}}/edit" method="post">
@@ -20,5 +33,6 @@
         <a class="btn btn-secondary" href="/{{folder.uuid_name}}/{{document.uuid_name}}/recognise">Запустить распознование текста</a> 
     </div>
 </form>
+</div>
 
-</div> 
+{% include 'footer.html' %}

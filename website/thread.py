@@ -1,14 +1,17 @@
-from pathlib import Path
-import easyocr
-import psutil
-import os
-import pdf2image
-import tempfile
-from queue import Queue
-from website.models import QueueStatus, Document
-from django.contrib.postgres.search import SearchVector
 import logging
+import os
+import tempfile
 import threading
+from pathlib import Path
+from queue import Queue
+
+import pdf2image
+import psutil
+from django.contrib.postgres.search import SearchVector
+
+import easyocr
+from website.models import Document, QueueStatus
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 logger = logging.getLogger(__name__)
 image_queue = Queue()
@@ -24,7 +27,7 @@ def ParseFileThread():
         reader = easyocr.Reader(['ru'], gpu=True)
         with tempfile.TemporaryDirectory() as path:
             pdf2image.convert_from_path(
-                os.path.join(BASE_DIR, str(document.get_url()))[1:], 700, path)
+                os.path.join(BASE_DIR, str(document.get_url())[1:]), 700, path)
             for i in sorted(os.listdir(path)):
                 logger.warning("обработка " + i)
                 text += ''.join(reader.readtext(
@@ -34,10 +37,10 @@ def ParseFileThread():
             document.read_status = 1
             document.save()
             q = QueueStatus.objects.get()
-            q.actual_progress+=1    
-            if q.actual_progress==q.max_progress:
-                q.actual_progress=0
-                q.max_progress=0
+            q.actual_progress += 1
+            if q.actual_progress == q.max_progress:
+                q.actual_progress = 0
+                q.max_progress = 0
             q.save()
             logger.warning("конец обработки файла " + document.name)
             image_queue.task_done()

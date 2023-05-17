@@ -1,4 +1,7 @@
 <script type="text/javascript">
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+
     $('input[type="file"]').change((event) => {
       var fileName = event.target.files[0].name;
       document.querySelector("#fname").value=fileName;
@@ -9,32 +12,8 @@
       let filename = document.querySelector('#fname');
       if (yratext.test(filename.value)) {
         filename.value = '';
-        alert('Введены запрещенные символы : < или >');
+        alert('Введены запрещенные символы: < или >');
       }
-    }
-
-    function Info(name) {
-      var i = copy1.indexOf(name);
-      
-      let offcanvasBottomLabel = document.querySelector("#offcanvasBottomLabel"); 
-      let info_desc = document.querySelector("#info_desc");
-      
-      offcanvasBottomLabel.innerHTML = copy1[i]
-      info_desc.innerHTML = copy2[i]
-    }
-
-    var elements_name = document.querySelectorAll(".cutname");
-    var elements_desc = document.querySelectorAll(".cutdesc");
-    var copy1 = [];
-    copy1.length = elements_name.length;
-    var copy2 = [];
-    copy2.length = elements_desc.length;
-    for (var i = 0; i < elements_name.length; i++) {
-      copy1[i] = elements_name[i].innerHTML;
-    }
-
-    for (var i = 0; i < elements_desc.length; i++) {
-      copy2[i] = elements_desc[i].innerHTML;
     }
 </script>
 </html>

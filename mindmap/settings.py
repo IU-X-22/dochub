@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +27,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", 'foo')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=1))
 ALLOWED_HOSTS = str(os.environ.get("DJANGO_ALLOWED_HOSTS")).split(" ")
-ALLOWED_HOSTS  = ['*']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -70,12 +71,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mindmap.wsgi.application'
 
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-     'formatters': {
+    'formatters': {
         'verbose': {
             'format': '{levelname} {asctime}  {message}',
             'style': '{',
@@ -104,35 +103,36 @@ LOGGING = {
 DATABASES = {
 
     "default": {
-    #"ENGINE":  "django.db.backends.sqlite3",
-    #   'NAME': str(BASE_DIR / 'db.sqlite3'),
-       "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        # "ENGINE":  "django.db.backends.sqlite3",
+        # 'NAME': str(BASE_DIR / 'db.sqlite3'),
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
         "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
-       "USER": os.environ.get("SQL_USER", "user"),
+        "USER": os.environ.get("SQL_USER", "user"),
         "PASSWORD": os.environ.get("SQL_PASSWORD", "password"),
         "HOST": os.environ.get("SQL_HOST", "localhost"),
-       "PORT": os.environ.get("SQL_PORT", "5432"),
+        "PORT": os.environ.get("SQL_PORT", "5432"),
     }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.' +
+        'UserAttributeSimilarityValidator',
     },
     {
-        'NAME':  'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':  'django.contrib.auth.password_validation.' +
+        'MinimumLengthValidator',
     },
     {
-        'NAME':  'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':  'django.contrib.auth.password_validation.' +
+        'CommonPasswordValidator',
     },
     {
-        'NAME':'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.' +
+        'NumericPasswordValidator',
     },
 ]
 
@@ -165,5 +165,3 @@ STATICFILES_DIRS = (
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
-
