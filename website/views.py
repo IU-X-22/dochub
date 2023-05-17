@@ -381,12 +381,14 @@ def login_page(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        user_ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
-        ip_1 = user_ip_address.split(',')[0]
-        ip_2 = request.META.get('REMOTE_ADDR')
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
         user = authenticate(username=username, password=password)
         if user is None:
-            logger.warning(f"неудачный вход : {username} {password} {ip_1} or {ip_2}")
+            logger.warning(f"неудачный вход : {username} {password} {ip}")
             messages.add_message(request, messages.ERROR,
                                  "Неправильный логин или пароль")
             return render(request, 'login.html')

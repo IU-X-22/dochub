@@ -7,7 +7,8 @@ services:
       sh -c "
              python3 manage.py makemigrations website  &&
              python3 manage.py migrate --run-syncdb &&
-             python3 manage.py runserver 0.0.0.0:8000"
+             gunicorn --bind 0.0.0.0:8000 mindmap.wsgi"
+    # python3 manage.py runserver 0.0.0.0:8000"
     image: kosten19/dochub
     volumes:
       - file_system_data:/home/moderator/documents/
@@ -27,8 +28,17 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
       - POSTGRES_DB=dochub
- 
+  nginx:
+    image: nginx
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - static_files:/home/moderator/documents
+      - ./nginx-conf.conf:/etc/nginx/conf.d  
 volumes:
   file_system_data:
   postgres_data:
   dochub_logs:
+  static_files:
