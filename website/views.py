@@ -43,7 +43,7 @@ def file_in_browser_open(request, id_folder, id_file):
 
 
 @login_required(login_url='/login/')
-@permission_required('website.edit_document', raise_exception=True)
+@permission_required('website.view_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
     try:
         document = Document.objects.get(uuid_name=id_file)
@@ -76,7 +76,7 @@ def one_file(request, id_folder, id_file):
 
 
 @login_required(login_url='/login/')
-@permission_required('website.edit_document', raise_exception=True)
+@permission_required('website.change_document', raise_exception=True)
 def recognise_file_text(request, id_folder, id_file):
     try:
         document = Document.objects.get(uuid_name=id_file)
@@ -85,20 +85,24 @@ def recognise_file_text(request, id_folder, id_file):
         assert check_bruteforce, "возможен перебор директорий!"
         document.read_status = 0
         document.save()
+        if len(QueueStatus.objects.all()) == 0:
+            q = QueueStatus.objects.create(
+             actual_progress=0, max_progress=0)
+            q.save()
         q = QueueStatus.objects.get()
-        q.max_progress += 1
+        q.max_progress +=1
         q.save()
         add_image(document)
         return redirect('/'+str(id_folder))
     except Exception as ex:
         logger.warning(
             f"пользователь {request.user.username} " +
-            f"попытался открыть файл : {id_folder}/{id_file} {ex} ")
+            f"попытался запустить в обработку файл : {id_folder}/{id_file} {ex} ")
         return redirect('/')
 
 
 @login_required(login_url='/login/')
-@permission_required('website.edit_document', raise_exception=True)
+@permission_required('website.change_document', raise_exception=True)
 def edit_file_text(request, id_folder, id_file):
     if request.method == 'POST':
         try:
@@ -208,9 +212,13 @@ def add_document(request):
                 group_uuid=folder.uuid_name).count()
             folder.save()
             logger.warning(
-                f"пользователь {request.user.username}" +
+                f"пользователь {request.user.username} " +
                 f"загрузил документ {file_name}")
             if is_recognise:
+                if len(QueueStatus.objects.all()) == 0:
+                    q = QueueStatus.objects.create(
+                        actual_progress=0, max_progress=0)
+                    q.save()
                 q = QueueStatus.objects.get()
                 q.max_progress += 1
                 q.save()
@@ -310,6 +318,13 @@ def search_query(request):
         logger.warning(
             f"пользователь {request.user.username} " +
             f"осуществил поиск: {query}")
+        try:
+            progress = QueueStatus.objects.get()
+            context.update(
+                {'progress':
+                    int(progress.actual_progress*100 / progress.max_progress)})
+        except Exception:
+            context.update({'progress': 0})
         response = render(request, 'documents.html', context)
         return response
     except Exception as ex:
@@ -349,9 +364,16 @@ def search_in_folder_query(request, id_folder):
                      Q(description__icontains=query))).annotate(
                         headline=search_headline)
                 context.update({'documents': documents, "search": "True"})
-        logger.warning(
-                f"пользователь {request.user.username} " +
-                f"осуществил поиск: {query} в папке {folder}")
+            logger.warning(
+                    f"пользователь {request.user.username} " +
+                    f"осуществил поиск: {query} в папке {folder}")
+        try:
+            progress = QueueStatus.objects.get()
+            context.update(
+                {'progress':
+                    int(progress.actual_progress*100 / progress.max_progress)})
+        except Exception:
+            context.update({'progress': 0})
         response = render(request, 'documents.html', context)
         return response
     except Exception as ex:

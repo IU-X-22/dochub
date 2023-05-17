@@ -4,4 +4,3 @@ psycopg2-binary
 psutil
 pdf2image
 opencv-contrib-python==4.5.5.62
-gunicorn

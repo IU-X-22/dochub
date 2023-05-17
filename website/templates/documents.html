@@ -19,15 +19,22 @@
       <thead>
         <tr>
             <th scope="col">
-              {% if request.GET.sortby == "fromname" %}
+              {% if search != None %}
+              <a class="text-decoration-none text-dark">Название</a>
+              {% else %}
+                {% if request.GET.sortby == "fromname" %}
                 <a class="text-decoration-none text-dark" href="?sortby=toname">Название <i class="bi bi-arrow-down"></i></a>
               {% elif request.GET.sortby == "toname" %}
                 <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
               {% else %}
-                <a class="text-decoration-none text-dark" href="?sortby=fromname">Название<i class="bi bi-arrow-up"></i></a>
+                <a class="text-decoration-none text-dark" href="?sortby=fromname">Название <i class="bi bi-arrow-up"></i></a>
+                 {% endif %}
               {% endif %}
             </th>
             <th scope="col">
+            {% if search != None %}
+               <a class="text-decoration-none text-dark" >Состояние</a>
+              {% else %}
               {% if request.GET.sortby == "fromstatus" %}
                 <a class="text-decoration-none text-dark" href="?sortby=tostatus">Состояние <i class="bi bi-arrow-down"></i></a>
               {% elif request.GET.sortby == "tostatus" %}
@@ -35,15 +42,20 @@
               {% else %}
                 <a class="text-decoration-none text-dark" href="?sortby=fromstatus">Состояние <i class="bi bi-arrow-up"></i></a>
               {% endif %}
+              {% endif %}
             </th>
             <th style="width:40%" scope="col"></th>
             <th scope="col">
-              {% if request.GET.sortby == "fromtime" %}
+            {% if search != None %}
+               <a class="text-decoration-none text-dark" >Дата добавления</a>
+              {% else %}
+            {% if request.GET.sortby == "fromtime" %}
                 <a class="text-decoration-none text-dark" href="?sortby=totime">Дата добавления <i class="bi bi-arrow-down"></i></a>
               {% elif request.GET.sortby == "totime" %}
                 <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления <i class="bi bi-arrow-up"></i></a>
               {% else %}
-                <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления<i class="bi bi-arrow-up"></i></a>
+                <a class="text-decoration-none text-dark" href="?sortby=fromtime">Дата добавления <i class="bi bi-arrow-up"></i></a>
+              {% endif %}
               {% endif %}
             </th>
             <th>
@@ -60,11 +72,11 @@
                     <i class="bi bi-check text-success"></i> Готов
                 </p>
             {% elif document.read_status == 1 %}
-                <p data-bs-toggle="tooltip" data-bs-title="Файл ожидает проверки модератором">
+                <p data-bs-toggle="tooltip" data-bs-title="Файл ожидает ручной проверки после процесса распознавания текста(если было задано условие). Иначе файл ожидает ручного ввода текста из документа.">
                     <i class="bi bi-circle-half text-warning"></i> Ожидает проверки
                 </p>
             {% else %}
-                <p data-bs-toggle="tooltip" data-bs-title="Файл обрабатывается системой">
+                <p data-bs-toggle="tooltip" data-bs-title="Идет распознавание текста, подождите">
                     <i class="bi bi-circle text-warning"></i> Обрабатывается
                 </p>
             {% endif %}

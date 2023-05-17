@@ -23,11 +23,11 @@ def ParseFileThread():
     while True:
         document = image_queue.get()
         text = ''
-        logger.warning("начало обработки файла "+document.name)
+        logger.warning(f"начало обработки файла {document.name} {image_queue.qsize()}")
         reader = easyocr.Reader(['ru'], gpu=True)
         with tempfile.TemporaryDirectory() as path:
             pdf2image.convert_from_path(
-                os.path.join(BASE_DIR, str(document.get_url())[1:]), 700, path)
+                os.path.join(BASE_DIR, str(document.get_url()))[1:], 700, path)
             for i in sorted(os.listdir(path)):
                 logger.warning("обработка " + i)
                 text += ''.join(reader.readtext(
@@ -42,7 +42,7 @@ def ParseFileThread():
                 q.actual_progress = 0
                 q.max_progress = 0
             q.save()
-            logger.warning("конец обработки файла " + document.name)
+            logger.warning(f"конец обработки файла {document.name} {image_queue.qsize()} ") 
             image_queue.task_done()
 
 
