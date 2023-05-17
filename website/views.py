@@ -2,7 +2,7 @@ from urllib.parse import unquote
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib import messages
-from django.db.models import Q,F
+from django.db.models import Q, F
 from django.contrib.postgres.search import (
     SearchVector, SearchQuery, SearchRank, SearchHeadline)
 from django.views.decorators.clickjacking import xframe_options_sameorigin
@@ -46,7 +46,6 @@ def file_in_browser_open(request, id_folder, id_file):
 @permission_required('website.edit_document', raise_exception=True)
 def one_file(request, id_folder, id_file):
     try:
-        progress = QueueStatus.objects.get()
         document = Document.objects.get(uuid_name=id_file)
         folder = document.group_uuid
         check_bruteforce = str(folder.uuid_name) == str(id_folder)
@@ -57,9 +56,12 @@ def one_file(request, id_folder, id_file):
             'doc_url': '/'+str(folder.uuid_name)+'/'+str(document.uuid_name)
         }
         try:
-            context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
-        except:
-            context.update({'progress' : 0})   
+            progress = QueueStatus.objects.get()
+            context.update(
+                {'progress':
+                    int(progress.actual_progress*100 / progress.max_progress)})
+        except Exception:
+            context.update({'progress': 0})
         logger.warning(
             f"пользователь {request.user.username} " +
             f"открыл страницу с файлом \"{document.name}\"" +
@@ -73,9 +75,6 @@ def one_file(request, id_folder, id_file):
         return redirect('/')
 
 
-
-
-
 @login_required(login_url='/login/')
 @permission_required('website.edit_document', raise_exception=True)
 def recognise_file_text(request, id_folder, id_file):
@@ -87,7 +86,7 @@ def recognise_file_text(request, id_folder, id_file):
         document.read_status = 0
         document.save()
         q = QueueStatus.objects.get()
-        q.max_progress+=1
+        q.max_progress += 1
         q.save()
         add_image(document)
         return redirect('/'+str(id_folder))
@@ -96,8 +95,6 @@ def recognise_file_text(request, id_folder, id_file):
             f"пользователь {request.user.username} " +
             f"попытался открыть файл : {id_folder}/{id_file} {ex} ")
         return redirect('/')
-
-
 
 
 @login_required(login_url='/login/')
@@ -135,7 +132,6 @@ def edit_file_text(request, id_folder, id_file):
 def one_folder(request, id_folder):
     context = {}
     try:
-        progress = QueueStatus.objects.get()
         folder = GroupDocuments.objects.get(uuid_name=id_folder)
         context = {
             'folder': folder,
@@ -143,9 +139,12 @@ def one_folder(request, id_folder):
             'documents': Document.objects.filter(group_uuid=id_folder)
         }
         try:
-            context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
-        except:
-            context.update({'progress' : 0})   
+            progress = QueueStatus.objects.get()
+            context.update(
+                {'progress':
+                    int(progress.actual_progress*100/progress.max_progress)})
+        except Exception:
+            context.update({'progress': 0})
     except Exception as ex:
         logger.warning(
             f"пользователь {request.user.username} попытался открыть папку " +
@@ -172,7 +171,7 @@ def one_folder(request, id_folder):
                 {'documents': docs.order_by('-read_status')})
         elif str(sort) == 'fromstatus':
             context.update(
-                {'documents': docs.order_by('-read_status')[::-1]})    
+                {'documents': docs.order_by('-read_status')[::-1]})
         else:
             context.update(
                 {'documents': docs})
@@ -205,14 +204,15 @@ def add_document(request):
                                 description=file_description,
                                 group_uuid=folder)
             document.save()
-            folder.count = Document.objects.filter(group_uuid=folder.uuid_name).count()
+            folder.count = Document.objects.filter(
+                group_uuid=folder.uuid_name).count()
             folder.save()
             logger.warning(
                 f"пользователь {request.user.username}" +
                 f"загрузил документ {file_name}")
             if is_recognise:
                 q = QueueStatus.objects.get()
-                q.max_progress+=1    
+                q.max_progress += 1
                 q.save()
                 add_image(document)
             else:
@@ -245,7 +245,8 @@ def delete_document(request, id_folder, id_file):
             f"удалил документ {document.name}")
         document.document.delete()
         document.delete()
-        folder.count = Document.objects.filter(group_uuid=folder.uuid_name).count()
+        folder.count = Document.objects.filter(
+            group_uuid=folder.uuid_name).count()
         folder.save()
         return redirect('/'+str(id_folder))
     except Exception as ex:
@@ -296,11 +297,16 @@ def search_query(request):
                     "осуществил пустой поиск! Возможна атака!")
                 return redirect('/')
             else:
-                search_query = SearchQuery(query,config='russian')
+                search_query = SearchQuery(query, config='russian')
                 logger.warning(f"search {search_query}")
-                search_headline = SearchHeadline(F('text'), search_query,config='russian')
-                documents =  Document.objects.filter(Q(text__icontains=query)  | Q(name__icontains=query) | Q(description__icontains=query)).annotate(headline=search_headline)
-                context.update({'documents':documents , "search"  : "True" })
+                search_headline = SearchHeadline(
+                    F('text'), search_query, config='russian')
+                documents = Document.objects.filter(
+                    Q(text__icontains=query) |
+                    Q(name__icontains=query) |
+                    Q(description__icontains=query)).annotate(
+                        headline=search_headline)
+                context.update({'documents': documents, "search": "True"})
         logger.warning(
             f"пользователь {request.user.username} " +
             f"осуществил поиск: {query}")
@@ -315,26 +321,34 @@ def search_query(request):
 
 @login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
-def search_in_folder_query(request,id_folder):
+def search_in_folder_query(request, id_folder):
     try:
         folder = GroupDocuments.objects.get(uuid_name=id_folder)
         context = {
                 'folders': [folder],
                 'folder': folder,
                 'year': str(
-                    datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
+                    datetime.now(
+                        timezone(timedelta(hours=+3))).strftime('%Y'))}
         if request.method == "POST":
             query = request.POST.get('search')
             if str(query) == '':
                 logger.warning(
                         f"пользователь {request.user.username} " +
-                        "осуществил пустой поиск в папке {folder.name}! Возможна атака!")
+                        f"осуществил пустой поиск в папке {folder.name}! " +
+                        "Возможна атака!")
                 return redirect('/')
             else:
-                search_query = SearchQuery(query,config='russian')
-                search_headline = SearchHeadline(F('text'), search_query,config='russian')
-                documents =  Document.objects.filter(Q(group_uuid=folder.uuid_name) & ( Q(text__icontains=query)  | Q(name__icontains=query) | Q(description__icontains=query))).annotate(headline=search_headline)
-                context.update({'documents':documents , "search"  : "True" })
+                search_query = SearchQuery(query, config='russian')
+                search_headline = SearchHeadline(
+                    F('text'), search_query, config='russian')
+                documents = Document.objects.filter(
+                    Q(group_uuid=folder.uuid_name) &
+                    (Q(text__icontains=query) |
+                     Q(name__icontains=query) |
+                     Q(description__icontains=query))).annotate(
+                        headline=search_headline)
+                context.update({'documents': documents, "search": "True"})
         logger.warning(
                 f"пользователь {request.user.username} " +
                 f"осуществил поиск: {query} в папке {folder}")
@@ -344,20 +358,23 @@ def search_in_folder_query(request,id_folder):
         logger.warning(
             f"пользователь {request.user.username} " +
             f"ошибка поиска {ex}")
-        return redirect('/')    
+        return redirect('/')
+
 
 @login_required(login_url='/login/')
 @permission_required('website.view_document', raise_exception=True)
 def main_page(request):
-    progress = QueueStatus.objects.get()
     context = {
         'folders': [],
         'year': str(
             datetime.now(timezone(timedelta(hours=+3))).strftime('%Y'))}
     try:
-        context.update({'progress' : int(progress.actual_progress*100/progress.max_progress)})
-    except:
-         context.update({'progress' : 0})   
+        progress = QueueStatus.objects.get()
+        context.update(
+            {'progress':
+                int(progress.actual_progress*100/progress.max_progress)})
+    except Exception:
+        context.update({'progress': 0})
     if request.method == "GET":
         sort = request.GET.get('sortby')  # request.GET['sortby']
         folders = GroupDocuments.objects.all()
@@ -393,11 +410,13 @@ def login_page(request):
                                  "Неправильный логин или пароль")
             return render(request, 'login.html')
         else:
-            if len(QueueStatus.objects.all())==0:
-                q = QueueStatus.objects.create(actual_progress=0,max_progress=0)
+            if len(QueueStatus.objects.all()) == 0:
+                q = QueueStatus.objects.create(
+                    actual_progress=0, max_progress=0)
                 q.save()
             login(request, user)
-            logger.warning(f"пользователь {username} вошел в систему {ip}")
+            logger.warning(
+                f"пользователь {username} вошел в систему {ip}")
             messages.add_message(request, messages.SUCCESS,
                                  "Авторизация успешна")
             return redirect('/')

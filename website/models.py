@@ -1,7 +1,8 @@
-from django.db import models
 import uuid
+
 from django.contrib.auth.models import AbstractUser
-from django.contrib.postgres.search import  SearchVectorField 
+from django.contrib.postgres.search import SearchVectorField
+from django.db import models
 
 
 class GroupDocuments(models.Model):
@@ -32,11 +33,10 @@ class Document(models.Model):
     description = models.TextField()
     text = models.TextField()
     read_status = models.IntegerField(default=0)
-    ''' 
-    0 - обрабатывается
+    '''
+    0 - Обрабатывается
     1 - Ожидает проверки
-    2 - готов
-
+    2 - Готов
     '''
     datetime = models.DateTimeField()
     group_uuid = models.ForeignKey(
@@ -51,6 +51,7 @@ class Document(models.Model):
 
 class CustomUser(AbstractUser):
     position = models.TextField()
+
 
 class QueueStatus(models.Model):
     max_progress = models.IntegerField(default=0)
