@@ -2,4 +2,4 @@
 High-efficiency pdf-file repository
 
 # Installation
-### todo: make better readme
+docker-compose up -d
